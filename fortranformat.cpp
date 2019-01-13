@@ -23,6 +23,7 @@ struct Scanner {
 void  write_i(Scanner* scanner, va_list ap);
 void  write_f(Scanner* scanner, va_list ap);
 void  write_l(Scanner* scanner, va_list ap);
+void  write_a(Scanner* scanner, va_list ap);
 
 void consume(Scanner* scanner);
 void extract(Scanner* scanner, char* put, size_t length);
@@ -72,6 +73,10 @@ void write(char const* formatstr, ...)
 
                 case 'L':
                     write_l(&scanner, ap); 
+                break;
+
+                case 'A':
+                    write_a(&scanner, ap); 
                 break;
             }
         }
@@ -163,6 +168,28 @@ void  write_l(Scanner* scanner, va_list ap)
     std::cout.flags(f);
 }
 
+
+void  write_a(Scanner* scanner, va_list ap)
+{
+    char const* value = va_arg(ap, char const*); 
+
+    consume(scanner);
+    int width = 0;
+    if (peek(scanner) == '.')
+    {
+        advance(scanner);
+        consume(scanner);
+        width = integer(scanner);
+    }
+    else
+    {
+        // do something?
+    }
+    // pop arg value
+    std::ios_base::fmtflags f(std::cout.flags());
+    std::cout << value;
+    std::cout.flags(f);
+}
 
 //
 // Scanner functions

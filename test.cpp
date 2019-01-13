@@ -20,6 +20,8 @@ int main()
 
 	write("(L7)", true);
 	write("(L7)", false);
+
+	write("(A)", "test");
 	// write("(I15, I15, I15)", 1, 0, 5);
 	// write("(3I15)", 1, 0, 5);
 }

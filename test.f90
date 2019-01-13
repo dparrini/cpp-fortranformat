@@ -36,4 +36,9 @@ implicit none
     print *, "-------------"
     print "(L4)", .FALSE.
     print *, "--"
+
+    print *, "(A), test"
+    print *, "-------------"
+    print "(A)", "test"
+    print *, "--"
 end program hello
