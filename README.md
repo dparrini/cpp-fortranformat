@@ -1,10 +1,10 @@
 # C++ Fortran Format
 
-This is an under development module that provides a `write` function similar to Fortran's `print`
+This is an under development module that provides a `printfor` function similar to Fortran's `print`
 function, with a format specification string:
 
 ```cpp
-write("(I3, 2(1X, F4.2))", 10, 3.1416, 3.333);
+printfor("(I3, 2(1X, F4.2))", 10, 3.1416, 3.333);
 // output: 
 //  10 3.14 3.33
 ```
@@ -36,7 +36,7 @@ Becomes this:
 
 void main()
 {
-    writer("(A, 2(I3, I3)", "test: ", 1, 2, 3, 4);
+    printfor("(A, 2(I3, I3)", "test: ", 1, 2, 3, 4);
 }
 ```
 
