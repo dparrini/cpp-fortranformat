@@ -1,0 +1,41 @@
+# C++ Fortran Format
+
+
+## Supported Features
+
+This version ignores the repeat count.
+
+
+### Repeatable edit descriptor
+
+| Edit Descriptor | Available? |
+| Iw              |    Yes     |                    
+| Iw.m            |    No      |                      
+| Fw.d            |    No      |                      
+| Ew.d            |    No      |                      
+| Ew.dEe          |    No      |                        
+| Dw.d            |    No      |                      
+| Gw.d            |    No      |                      
+| Gw.dEe          |    No      |                        
+| Lw              |    No      |                    
+| A               |    No      |                   
+| Aw              |    No      |                    
+
+
+### Nonrepeatable edit descriptor
+
+| Edit Descriptor      | Available? |
+| 'h h ... h ' 1 2 n   |    No      |
+| nHh h ... h 1 2 n    |    No      |
+| Tc                   |    No      |
+| TLc                  |    No      |
+| TRc                  |    No      |
+| nX                   |    No      |
+| /                    |    No      |
+| :                    |    No      |
+| S                    |    No      |
+| SP                   |    No      |
+| SS                   |    No      |
+| kP                   |    No      |
+| BN                   |    No      |
+| BZ                   |    No      |
