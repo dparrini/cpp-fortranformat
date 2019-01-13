@@ -44,8 +44,8 @@ testf : $(FOBJ)
 .PHONY : clean
 
 clean:
-	rm $(OUTDIR)/test.exe
-	rm $(OUTDIR)/testf.exe
-	rm $(OUTDIR)/$(BINTARGET).exe
-	rm $(OBJDIR)/*.o
-	rm $(OBJDIR)/*.of
+	rm -r $(OUTDIR)/test.exe
+	rm -r $(OUTDIR)/testf.exe
+	rm -r $(OUTDIR)/$(BINTARGET).exe
+	rm -r $(OBJDIR)/*.o
+	rm -r $(OBJDIR)/*.of
