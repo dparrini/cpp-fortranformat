@@ -54,7 +54,7 @@ implicit none
     print *, "--"
 
 
-	print *, "(3I3), 1, 2, 3"
+    print *, "(3I3), 1, 2, 3"
     print *, "-------------"
     print "(3I3)", 1, 2, 3
     print *, "--"
@@ -151,5 +151,10 @@ implicit none
     print *, "(F10.3, F10.1, F10.0, F5.5, F5.4), X=-1.345678"
     print *, "-------------"
     print "(F10.3, F10.1, F10.0, F5.5, F5.4)", X, X, X, X, X
+    print *, "--"
+
+    print *, "(F7.3, 1X, F5.3, 1X, F4.3), 3.001345, 3.001345, 3.001345"
+    print *, "-------------"
+    print "(F7.3, 1X, F5.3, 1X, F4.3)", 3.001345, 3.001345, 3.001345
     print *, "--"
 end program hello

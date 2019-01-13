@@ -15,7 +15,7 @@ Currently, the output goes directly to the output stream (stdout).
 
 Future support for generic C++ streams and strings are planned after some improvements over available edit descriptors.
 
-This work is inspired by [py-fortranformat](https://bitbucket.org/brendanarnold/py-fortranformat/wiki/Home).
+This work is inspired by [py-fortranformat](https://bitbucket.org/brendanarnold/py-fortranformat/wiki/Home). Also, [Acutest](https://github.com/mity/acutest) is used as unit testing facility.
 
 
 ## Usage

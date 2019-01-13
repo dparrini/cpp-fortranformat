@@ -34,7 +34,6 @@ void printfor(char const*, ...);
 void printfor(ostream&, char const*, ...);
 
 
-void tests();
 struct Scanner {
     const char* start;
     const char* current;

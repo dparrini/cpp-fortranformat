@@ -82,87 +82,6 @@ void skipWhitespace(Scanner*);
 #endif
 
 
-void tests()
-{
-    char const* fmt = "503 teste";
-    Scanner scanner(fmt);
-    int num = integer(&scanner);
-    std::cout << "Tests" << std::endl;
-    std::cout << num << ";" << std::endl;
-
-    std::cout << "Tests (formats)" << std::endl;
-    char put[MAXLEN];
-    extract_decimal_part(put, 3.14, 2);
-    std::cout << put << std::endl;
-    extract_decimal_part(put, 3.00, 2);
-    std::cout << put << std::endl;
-    extract_decimal_part(put, 4.00002, 5);
-    std::cout << put << std::endl;
-
-    // lengths
-    std::cout << "Tests (lengths)" << std::endl;
-    std::cout << integer_str_length(0) << std::endl;
-    std::cout << integer_str_length(11) << std::endl;
-    std::cout << integer_str_length(100) << std::endl;
-    std::cout << integer_str_length(1063) << std::endl;
-    std::cout << integer_str_length(100000003) << std::endl;
-
-    // integer parts
-    std::cout << "Tests (integer parts)" << std::endl;
-    extract_integer_part(put, 0.45);
-    std::cout << put << std::endl;
-    extract_integer_part(put, 11.3);
-    std::cout << put << std::endl;
-    extract_integer_part(put, 100.7003);
-    std::cout << put << std::endl;
-    extract_integer_part(put, 1063.0);
-    std::cout << put << std::endl;
-    extract_integer_part(put, 100000003.0004);
-    std::cout << put << std::endl;
-
-    // write
-    size_t width = 5;
-    std::cout << std::endl;
-    std::cout << "Tests (write)" << std::endl;
-    format_f(put, 0.0, 1, 0); // 0.0 -> ___0.
-    std::cout << put << std::endl;
-    format_f(put, 0.45, width, 3); // 0.450 -> _0.450
-    std::cout << put << std::endl;
-    format_f(put, 11.3, width, 3); // 11.300 -> *****
-    std::cout << put << std::endl;
-    format_f(put, 100.7003, width, 1); // 100.700 -> 100.7
-    std::cout << put << std::endl;
-    format_f(put, 0.0235, width, 4); // 0.0235 -> .0235
-    std::cout << put << std::endl;
-    format_f(put, 100000003.0004, 10, 0); // 100000003.
-    std::cout << put << std::endl;
-
-    // write
-    std::cout << std::endl;
-    std::cout << "Tests (negative write)" << std::endl;
-    format_f(put, -0.0, 1, 0); // -0.0 -> *
-    std::cout << put << std::endl;
-    format_f(put, -0.0, 2, 0); // -0.0 -> **
-    std::cout << put << std::endl;
-    format_f(put, -0.0, 3, 0); // -0.0 -> -0.
-    std::cout << put << std::endl;
-    format_f(put, -0.45, width-1, 3); // -0.450 -> *****
-    std::cout << put << std::endl;
-    format_f(put, -0.45, width, 3); // -0.450 -> -.450
-    std::cout << put << std::endl;
-    format_f(put, -0.45, width+1, 3); // -0.450 -> -0.450
-    std::cout << put << std::endl;
-    format_f(put, -11.3, width+1, 3); // -11.300 -> ******
-    std::cout << put << std::endl;
-    format_f(put, -100.7003, width+1, 1); // -100.700 -> -100.7
-    std::cout << put << std::endl;
-    format_f(put, -0.0235, width+1, 4); // -0.0235 -> -.0235
-    std::cout << put << std::endl;
-    format_f(put, -100000003.0004, 11, 0); // -100000003.
-    std::cout << put << std::endl;
-}
-
-
 void printfor(char const* formatstr, ...)
 {
     va_list ap;
@@ -190,7 +109,7 @@ void stream_printfor(ostream& stream, char const* formatstr, va_list* ap)
     {
         write_group(stream, &scanner, ap);
     }
-    stream << std::endl;    
+    stream << '\n';    
 }
 
 
@@ -204,7 +123,7 @@ void write_group(ostream& stream, Scanner* scanner, va_list* ap)
     {
         char c = advance(scanner);
 
-        // stream << "scanning " << c << std::endl;
+        // stream << "scanning " << c << '\n';
 
         // repeat count
         unsigned int repeat = 1;
@@ -510,7 +429,7 @@ void format_f(char* put, double value, size_t width, size_t precision)
     // whether the sign is present
     bool require_sign = value < 0; 
     // TODO: this test doesn't handle -0.0
-    // stream << "Sign" << require_sign << std::endl;
+    // stream << "Sign" << require_sign << '\n';
 
     // the integer part output is optional when its = 0
     bool optional_intvalue = 0 == intval;
