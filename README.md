@@ -54,7 +54,7 @@ test:   1  2  3  4
 
 | Edit Descriptor      | Available? |
 |:---------------------|:----------:|
-| 'h h ... h ' 1 2 n   |    No      |
+| 'h h ... h ' 1 2 n   |    Partial |
 | nHh h ... h 1 2 n    |    No      |
 | Tc                   |    No      |
 | TLc                  |    No      |
@@ -76,3 +76,7 @@ test:   1  2  3  4
 - If `d=0`, the actual implementation prints the number without the dot, while
 the Fortran implementation prints with the number with the dot but no decimal
 numbers.
+
+### `'string'`
+
+- Doesn't support escaping `''`.

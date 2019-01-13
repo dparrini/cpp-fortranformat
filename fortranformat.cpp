@@ -20,13 +20,14 @@ struct Scanner {
 };
 
 
-void  write_group(Scanner* scanner, va_list* ap);
-void  write_i(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void  write_f(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void  write_l(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void  write_a(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_group(Scanner* scanner, va_list* ap);
+void write_i(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_f(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_l(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_a(Scanner* scanner, va_list* ap, size_t repeat = 1);
 
-void  write_x(Scanner* scanner, size_t repeat = 1);
+void write_x(Scanner* scanner, size_t repeat = 1);
+void write_str(Scanner* scanner);
 
 void consume(Scanner* scanner);
 void extract(Scanner* scanner, char* put, size_t length);
@@ -80,6 +81,8 @@ void write_group(Scanner* scanner, va_list* ap)
     {
         char c = advance(scanner);
 
+        // std::cout << "scanning " << c << std::endl;
+
         // repeat count
         unsigned int repeat = 1;
         if (isDigit(c))
@@ -125,6 +128,10 @@ void write_group(Scanner* scanner, va_list* ap)
                     write_x(scanner, repeat); 
                 break;
             }
+        }
+        else if ('\'' == c)
+        {
+            write_str(scanner);
         }
         else if (')' == c)
         {
@@ -269,6 +276,34 @@ void write_x(Scanner* scanner, size_t repeat)
     {
         std::cout << " ";
     }
+}
+
+
+void write_str(Scanner* scanner)
+{
+    consume(scanner); // consume opening '
+    for (;;)
+    {
+        // TODO: deal with '' escape
+        char c = peek(scanner);
+        if ('\'' == c)
+        {
+            break;
+        }
+        else
+        {
+            advance(scanner);
+        }
+    }
+    // extract string before last '
+    char valstr[MAXLEN];
+    extract(scanner, valstr, MAXLEN);
+
+    advance(scanner);
+    consume(scanner); // consume last '
+
+    // print user string
+    std::cout << valstr;
 }
 
 

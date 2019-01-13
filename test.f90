@@ -87,4 +87,9 @@ implicit none
     print *, "-------------"
     print "(3(I3, 3X))", 1, 2, 3
     print *, "--"
+
+    print *, "(A, 'test'), different"
+    print *, "-------------"
+    print "(A, 'test')", "different "
+    print *, "--"
 end program hello
