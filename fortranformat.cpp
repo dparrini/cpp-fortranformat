@@ -284,15 +284,7 @@ void write_i(Scanner* scanner, va_list* ap, size_t repeat)
     consume(scanner);
 
     int width = integer(scanner);
-    int atleast = 0;
     
-    if (peek(scanner) == '.')
-    {
-        advance(scanner);
-        consume(scanner);
-        atleast = integer(scanner);
-    }
-
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
@@ -389,7 +381,6 @@ void write_a(Scanner* scanner, va_list* ap, size_t repeat)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
         char const* value = va_arg(*ap, char const*); 
-        size_t len = strlen(value);
 
         std::ios_base::fmtflags f(std::cout.flags());
         if (width > 0)
@@ -497,8 +488,6 @@ void format_f(char* put, double value, size_t width, size_t precision)
 
     // the integer part output is optional when its = 0
     bool optional_intvalue = 0 == intval;
-
-    size_t minimum_difference = 1 + require_sign;
 
     // the required string width, given the integral part, the dot and the 
     // precision
@@ -620,7 +609,6 @@ void extract_integer_part(char* put, double value)
 {
     unsigned int intpart = abs(static_cast<int>(value));
     size_t const digits = integer_str_length(abs(intpart));
-    size_t const tenmult = fast_10pow(digits);
 
     for(size_t pos = 0; pos < digits; ++pos)
     {
