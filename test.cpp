@@ -26,6 +26,8 @@ int main()
 	write("(A3)", "abcdefg");
 
 	write("(3I3)", 1, 2, 3);
+	write("  (((  3I3  )))  ", 1, 2, 3);
+	write("(3I3) ignored", 1, 2, 3);
 	write("(3A10)", "teste1", "teste2", "teste3");
 	// write("(I15, I15, I15)", 1, 0, 5);
 	// write("(3I15)", 1, 0, 5);

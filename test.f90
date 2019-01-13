@@ -58,7 +58,27 @@ implicit none
     print "(3I3)", 1, 2, 3
     print *, "--"
 
+    print *, "  (((  3I3  )))  , 1, 2, 3"
+    print *, "-------------"
+    print "  (((  3I3  )))  ", 1, 2, 3
+    print *, "--"
+
+    print *, "(3I3) ignored, 1, 2, 3"
+    print *, "-------------"
+    print "(3I3) ignored", 1, 2, 3
+    print *, "--"
+
+    print *, "(3(I3)), 1, 2, 3"
+    print *, "-------------"
+    print "(3(I3))", 1, 2, 3
+    print *, "--"
+
     print *, "(I3, I3, I3), 1, 2, 3"
+    print *, "-------------"
+    print "(I3, I3, I3)", 1, 2, 3
+    print *, "--"
+
+    print *, "(I3, I3, I3)ignored, 1, 2, 3"
     print *, "-------------"
     print "(I3, I3, I3)", 1, 2, 3
     print *, "--"

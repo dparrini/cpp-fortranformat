@@ -20,6 +20,7 @@ struct Scanner {
 };
 
 
+void  write_group(Scanner* scanner, va_list ap, size_t repeat = 1);
 void  write_i(Scanner* scanner, va_list ap, size_t repeat = 1);
 void  write_f(Scanner* scanner, va_list ap, size_t repeat = 1);
 void  write_l(Scanner* scanner, va_list ap, size_t repeat = 1);
@@ -54,49 +55,12 @@ void write(char const* formatstr, ...)
     
     va_list ap;
     va_start(ap, formatstr);
-    for (;;)
+
+    skipWhitespace(&scanner);
+    char c = advance(&scanner);
+    if ('(' == c)
     {
-        char c = advance(&scanner);
-
-        // repeat count
-        unsigned int repeat = 1;
-        if (isDigit(c))
-        {
-            repeat = integer(&scanner);
-            // TODO: repeat must be nonzero
-            c = advance(&scanner);
-        }
-
-        // edit descriptors
-        if (isAlpha(c))
-        {
-            switch(c)
-            {
-                case 'I':
-                    write_i(&scanner, ap, repeat); 
-                break;
-
-                case 'F':
-                    write_f(&scanner, ap, repeat); 
-                break;
-
-                case 'L':
-                    write_l(&scanner, ap, repeat); 
-                break;
-
-                case 'A':
-                    write_a(&scanner, ap, repeat); 
-                break;
-            }
-        }
-
-        if (isAtEnd(&scanner))
-        {
-            break;
-        }
-
-        // temporary solution, until its capable of interpreting (...)
-        consume(&scanner);
+        write_group(&scanner, ap, 1);
     }
     va_end(ap);
 
@@ -104,11 +68,70 @@ void write(char const* formatstr, ...)
 }
 
 
+void write_group(Scanner* scanner, va_list ap, size_t repeat)
+{
+    // consume open paren and following whitespace
+    skipWhitespace(scanner);
+    consume(scanner);
+
+    for (;;)
+    {
+        char c = advance(scanner);
+
+        // repeat count
+        unsigned int repeat = 1;
+        if (isDigit(c))
+        {
+            repeat = integer(scanner);
+            // TODO: repeat must be nonzero
+            c = advance(scanner);
+        }
+
+        // nested group
+        if ('(' == c)
+        {
+            write_group(scanner, ap, repeat);
+        }
+        // edit descriptors
+        else if (isAlpha(c))
+        {
+            switch(c)
+            {
+                case 'I':
+                    write_i(scanner, ap, repeat); 
+                break;
+
+                case 'F':
+                    write_f(scanner, ap, repeat); 
+                break;
+
+                case 'L':
+                    write_l(scanner, ap, repeat); 
+                break;
+
+                case 'A':
+                    write_a(scanner, ap, repeat); 
+                break;
+            }
+        }
+        else if (')' == c)
+        {
+            break;
+        }
+
+        if (isAtEnd(scanner))
+        {
+            break;
+        }
+    }
+}
+
+
 //
 // Format write edit descriptors
 //
 
-void  write_i(Scanner* scanner, va_list ap, size_t repeat)
+void write_i(Scanner* scanner, va_list ap, size_t repeat)
 {
     consume(scanner);
 
@@ -133,7 +156,7 @@ void  write_i(Scanner* scanner, va_list ap, size_t repeat)
 }
 
 
-void  write_f(Scanner* scanner, va_list ap, size_t repeat)
+void write_f(Scanner* scanner, va_list ap, size_t repeat)
 {
     consume(scanner);
 
@@ -158,7 +181,7 @@ void  write_f(Scanner* scanner, va_list ap, size_t repeat)
 }
 
 
-void  write_l(Scanner* scanner, va_list ap, size_t repeat)
+void write_l(Scanner* scanner, va_list ap, size_t repeat)
 {
     consume(scanner);
     int width = integer(scanner);
@@ -183,7 +206,7 @@ void  write_l(Scanner* scanner, va_list ap, size_t repeat)
 }
 
 
-void  write_a(Scanner* scanner, va_list ap, size_t repeat)
+void write_a(Scanner* scanner, va_list ap, size_t repeat)
 {
     consume(scanner);
     int width = 0;
