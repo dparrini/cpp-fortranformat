@@ -2,7 +2,7 @@
 #define H_FORTRANFORMAT_
 
 
-void write(char const* formatstr, ...);
+void printfor(char const* formatstr, ...);
 
 #ifdef DEBUG
 void tests();

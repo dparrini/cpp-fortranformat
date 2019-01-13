@@ -134,7 +134,7 @@ void tests()
 }
 
 
-void write(char const* formatstr, ...)
+void printfor(char const* formatstr, ...)
 {
     Scanner scanner(formatstr);
     
