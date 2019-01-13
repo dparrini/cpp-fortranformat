@@ -41,4 +41,14 @@ implicit none
     print *, "-------------"
     print "(A)", "test"
     print *, "--"
+
+    print *, "(A8), abcdefg"
+    print *, "-------------"
+    print "(A8)", "abcdefg"
+    print *, "--"
+
+    print *, "(A3), abcdefg"
+    print *, "-------------"
+    print "(A3)", "abcdefg"
+    print *, "--"
 end program hello

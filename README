@@ -19,7 +19,7 @@ This version ignores the repeat count.
 | Gw.dEe          |    No      |                        
 | Lw              |    Yes     |                    
 | A               |    Yes     |                   
-| Aw              |    No      |                    
+| Aw              |    Yes     |                    
 
 
 ### Nonrepeatable edit descriptor

@@ -22,6 +22,8 @@ int main()
 	write("(L7)", false);
 
 	write("(A)", "test");
+	write("(A8)", "abcdefg");
+	write("(A3)", "abcdefg");
 	// write("(I15, I15, I15)", 1, 0, 5);
 	// write("(3I15)", 1, 0, 5);
 }

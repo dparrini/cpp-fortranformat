@@ -172,13 +172,12 @@ void  write_l(Scanner* scanner, va_list ap)
 void  write_a(Scanner* scanner, va_list ap)
 {
     char const* value = va_arg(ap, char const*); 
+    size_t len = strlen(value);
 
     consume(scanner);
     int width = 0;
-    if (peek(scanner) == '.')
+    if (isDigit(peek(scanner)))
     {
-        advance(scanner);
-        consume(scanner);
         width = integer(scanner);
     }
     else
@@ -187,9 +186,22 @@ void  write_a(Scanner* scanner, va_list ap)
     }
     // pop arg value
     std::ios_base::fmtflags f(std::cout.flags());
-    std::cout << value;
+    if (width > 0)
+    {
+        char valsub[MAXLEN];
+        strncpy(valsub, value, width);
+        valsub[width] = '\0';
+
+        std::cout << std::setw(width);   
+        std::cout << valsub; 
+    }
+    else
+    {
+        std::cout << value;  
+    }
     std::cout.flags(f);
 }
+
 
 //
 // Scanner functions
