@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstdarg>
 #include <cstring>
 #include <iomanip>
@@ -33,6 +34,12 @@ void write_x(Scanner* scanner, size_t repeat = 1);
 void write_str(Scanner* scanner);
 void write_h(Scanner* scanner, size_t length);
 
+void format_f(char* put, double value, size_t width, size_t precision);
+size_t fast_10pow(size_t const exponent);
+size_t integer_str_length(unsigned int value);
+void extract_integer_part(char* put, double value);
+void extract_decimal_part(char* put, double value, size_t precision);
+
 void consume(Scanner* scanner);
 void extract(Scanner* scanner, char* put, size_t length);
 inline char advance(Scanner* scanner);
@@ -53,6 +60,53 @@ void tests()
     int num = integer(&scanner);
     std::cout << "Tests" << std::endl;
     std::cout << num << ";" << std::endl;
+
+    std::cout << "Tests (formats)" << std::endl;
+    char put[MAXLEN];
+    extract_decimal_part(put, 3.14, 2);
+    std::cout << put << std::endl;
+    extract_decimal_part(put, 3.00, 2);
+    std::cout << put << std::endl;
+    extract_decimal_part(put, 4.00002, 5);
+    std::cout << put << std::endl;
+
+    // lengths
+    std::cout << "Tests (lengths)" << std::endl;
+    std::cout << integer_str_length(0) << std::endl;
+    std::cout << integer_str_length(11) << std::endl;
+    std::cout << integer_str_length(100) << std::endl;
+    std::cout << integer_str_length(1063) << std::endl;
+    std::cout << integer_str_length(100000003) << std::endl;
+
+    // integer parts
+    std::cout << "Tests (integer parts)" << std::endl;
+    extract_integer_part(put, 0.45);
+    std::cout << put << std::endl;
+    extract_integer_part(put, 11.3);
+    std::cout << put << std::endl;
+    extract_integer_part(put, 100.7003);
+    std::cout << put << std::endl;
+    extract_integer_part(put, 1063.0);
+    std::cout << put << std::endl;
+    extract_integer_part(put, 100000003.0004);
+    std::cout << put << std::endl;
+
+    // write
+    size_t width = 5;
+    std::cout << std::endl;
+    std::cout << "Tests (write)" << std::endl;
+    format_f(put, 0.0, 1, 0); // 0.0 -> ___0.
+    std::cout << put << std::endl;
+    format_f(put, 0.45, width, 3); // 0.450 -> _0.450
+    std::cout << put << std::endl;
+    format_f(put, 11.3, width, 3); // 11.300 -> *****
+    std::cout << put << std::endl;
+    format_f(put, 100.7003, width, 1); // 100.700 -> 100.7
+    std::cout << put << std::endl;
+    format_f(put, 0.0235, width, 4); // 0.0235 -> .0235
+    std::cout << put << std::endl;
+    format_f(put, 100000003.0004, 10, 0); // 100000003.
+    std::cout << put << std::endl;
 }
 
 
@@ -219,11 +273,22 @@ void write_f(Scanner* scanner, va_list* ap, size_t repeat)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
         double value = va_arg(*ap, double); 
-        std::ios_base::fmtflags f(std::cout.flags());
-        std::cout << std::right;
-        std::cout.setf(std::ios::floatfield, std::ios::fixed);
-        std::cout << std::setw(width) << std::setprecision(decimal) << value; 
-        std::cout.flags(f);
+        char put[MAXLEN];
+        if (value >= 0)
+        {
+            format_f(put, value, width, decimal);  
+            std::ios_base::fmtflags f(std::cout.flags());
+            std::cout << std::setw(width) << std::right << put;
+            std::cout.flags(f);  
+        }
+        else
+        {
+            std::ios_base::fmtflags f(std::cout.flags());
+            std::cout << std::right;
+            std::cout.setf(std::ios::floatfield, std::ios::fixed);
+            std::cout << std::setw(width) << std::setprecision(decimal) << value; 
+            std::cout.flags(f);  
+        }
     }
 }
 
@@ -366,6 +431,167 @@ void write_h(Scanner* scanner, size_t length)
 
     // print user string
     std::cout << valstr;
+}
+
+
+//
+// Number formating
+//
+
+void format_f(char* put, double value, size_t width, size_t precision)
+{
+    const char FILL_CHAR = '*';
+    const char DOT_CHAR = '.';
+
+    // integer part
+    int intval = static_cast<int>(value);
+    char intvalstr[MAXLEN];
+    extract_integer_part(intvalstr, intval);
+    size_t intlen = strlen(intvalstr);
+
+    // fractional part
+    double fract = value - static_cast<double>(intval);
+    char fractstr[MAXLEN];
+    extract_decimal_part(fractstr, fract, precision);
+
+    // the integer part output is optional when its = 0
+    bool optional_intvalue = 0 == intval;
+
+    // the required string width, given the integral part, the dot and the 
+    // precision
+    size_t strwidth = intlen + 1 + precision;
+
+    if (strwidth > width and strwidth - width == 1 and optional_intvalue and width != 1)
+    {
+        // omit integral part and then write the number
+        put[0] = DOT_CHAR;
+        size_t const fraclen = strlen(fractstr);
+        size_t const maxchars = width - 1; // max. chars that can be written
+        size_t total = maxchars;
+
+        if (fraclen < maxchars)
+        {
+            total = fraclen;
+        }
+
+        for (size_t pos = 1; pos < total + 1; ++pos)
+        {
+            put[pos] = fractstr[pos - 1];
+        }
+        put[total + 1] = '\0';
+    }
+    else if (strwidth <= width)
+    {
+        // write the number
+        // integral part
+        size_t pos;
+        for (pos = 0; pos < intlen; ++pos)
+        {
+            put[pos] = intvalstr[pos];
+        }
+        put[intlen] = DOT_CHAR;
+        // fractional part
+        pos = intlen + 1;
+        size_t const fraclen = strlen(fractstr);
+        size_t const maxchars = width - intlen - 1; // max. chars that can be written
+        size_t total = maxchars;
+
+        if (fraclen < maxchars)
+        {
+            total = fraclen;
+        }
+
+        for (; pos < total + intlen + 1; ++pos)
+        {
+            put[pos] = fractstr[pos - intlen - 1];
+        }
+        put[total + intlen + 1] = '\0';
+    }
+    else
+    {
+        // fill with FILL_CHAR
+        for (size_t count = 0; count < strwidth; ++count)
+        {
+            put[count] = FILL_CHAR;
+        }
+        put[width] = '\0';
+    }
+}
+
+
+size_t fast_10pow(size_t const exponent)
+{
+    static size_t pow10[10] = {
+        1, 10, 100, 1000, 10000, 
+        100000, 1000000, 10000000, 100000000, 1000000000
+    };
+
+    if (exponent <= 9)
+    {
+        // fast, look-up
+        return pow10[exponent];
+    }
+    else
+    {
+        // generic
+        size_t powered = 1;
+        for (size_t n=0; n < exponent; ++n)
+        {
+            powered = powered * 10;
+        }
+        return powered;
+    }
+}
+
+
+size_t integer_str_length(unsigned int value)
+{
+    // general solution (using it for big numbers)
+    if (value >= 10000000) return floor(log10(value)) + 1;
+    // ugly, but optimal
+    // credits: https://stackoverflow.com/a/3069580
+    if (value >= 100000 )  return 6;
+    if (value >= 10000  )  return 5;
+    if (value >= 1000   )  return 4;
+    if (value >= 100    )  return 3;
+    if (value >= 10     )  return 2;
+    return 1;
+}
+
+
+void extract_integer_part(char* put, double value)
+{
+    unsigned int intpart = abs(static_cast<int>(value));
+    size_t const digits = integer_str_length(abs(intpart));
+    size_t const tenmult = fast_10pow(digits);
+
+    for(size_t pos = 0; pos < digits; ++pos)
+    {
+        size_t power = fast_10pow(digits - pos - 1);
+        unsigned int newvalue = static_cast<int>(intpart / power);
+        put[pos] = newvalue + '0';
+
+        intpart = intpart - newvalue * power;
+    }
+    put[digits] = '\0';
+}
+
+
+void extract_decimal_part(char* put, double value, size_t precision)
+{
+    int intpart = static_cast<int>(value);
+    double decpart = value - intpart;
+
+    // power of ten
+    double power = 1;
+    for (size_t pw = 1; pw <= precision; ++pw)
+    {
+        power = power * 10;
+        decpart = value * power - static_cast<int>(value*(power/10))*10;
+        intpart = static_cast<int>(decpart);
+        put[pw-1] = intpart + '0';
+    }
+    put[precision] = '\0';
 }
 
 

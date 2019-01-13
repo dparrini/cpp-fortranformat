@@ -2,6 +2,7 @@
 
 program hello
 implicit none
+    REAL X
     print *, "(I3), 20"
     print *, "-------------"
     print "(I3)", 20
@@ -116,5 +117,22 @@ implicit none
     print *, "(G10.3), 3.001345"
     print *, "-------------"
     print "(G10.3)", 3.001345
+    print *, "--"
+
+    X =  .345678
+    print *, "(F10.3, F10.1, F10.0, F5.5, F5.4), X=.345678"
+    print *, "-------------"
+    print "(F10.3, F10.1, F10.0, F5.5, F5.4)", X, X, X, X, X
+    print *, "--"
+
+    X =  1.345678
+    print *, "(F10.3, F10.1, F10.0, F5.5, F5.4), X=1.345678"
+    print *, "-------------"
+    print "(F10.3, F10.1, F10.0, F5.5, F5.4)", X, X, X, X, X
+    print *, "--"
+
+    print *, "(F1.0), 0.0"
+    print *, "-------------"
+    print "(F1.0)", 0.0
     print *, "--"
 end program hello

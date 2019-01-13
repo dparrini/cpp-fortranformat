@@ -80,9 +80,7 @@ output is basic and don't reflect expected Fortran's. Such cases are `Dw.d` and
 
 ### `Fw.d`
 
-- If `d=0`, the actual implementation prints the number without the dot, while
-the Fortran implementation prints with the number with the dot but no decimal
-numbers.
+- Does not handle negative numbers as expected.
 
 ### `'string'` and `nH`
 
