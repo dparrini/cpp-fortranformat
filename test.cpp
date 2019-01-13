@@ -1,18 +1,29 @@
+#include <cstring>
 #include <iostream>
 #include "fortranformat_tests.hpp"
 #include "tests/acutest.h"
 
 
 void test_basic(void);
+void test_single(void);
+
+bool compare_strings(char const* str1, char const* str2) { return strcmp(str1, str2) == 0; }
 
 
 TEST_LIST = {
 	{ "basic", test_basic },
+	{ "single", test_single },
 	{0}
 };
 
 
-void test_basic(void)
+void test_single()
+{
+
+}
+
+
+void test_basic()
 {
 	#ifdef DEBUG
 	std::cout << "Internal tests" << std::endl;

@@ -26,7 +26,9 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <ostream>
 #include "fortranformat.hpp"
+using std::ostream;
 
 size_t const MAXLEN = 200;
 
@@ -43,19 +45,21 @@ struct Scanner {
     }
 };
 
+void stream_printfor(ostream& stream, char const* formatstr, va_list* ap);
 
-void write_group(Scanner* scanner, va_list* ap);
-void write_i(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_f(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_d(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_e(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_g(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_l(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_a(Scanner* scanner, va_list* ap, size_t repeat = 1);
 
-void write_x(Scanner* scanner, size_t repeat = 1);
-void write_str(Scanner* scanner);
-void write_h(Scanner* scanner, size_t length);
+void write_group(ostream& stream, Scanner* scanner, va_list* ap);
+void write_i(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_f(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_d(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_e(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_g(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_l(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_a(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+
+void write_x(ostream& stream, Scanner* scanner, size_t repeat = 1);
+void write_str(ostream& stream, Scanner* scanner);
+void write_h(ostream& stream, Scanner* scanner, size_t length);
 
 void format_f(char* put, double value, size_t width, size_t precision);
 size_t fast_10pow(size_t const exponent);
@@ -161,24 +165,36 @@ void tests()
 
 void printfor(char const* formatstr, ...)
 {
-    Scanner scanner(formatstr);
-    
     va_list ap;
     va_start(ap, formatstr);
+    stream_printfor(std::cout, formatstr, &ap);
+    va_end(ap);
+}
 
+
+void printfor(ostream& stream, char const* formatstr, ...)
+{
+    va_list ap;
+    va_start(ap, formatstr);
+    stream_printfor(stream, formatstr, &ap);
+    va_end(ap);
+}
+
+
+void stream_printfor(ostream& stream, char const* formatstr, va_list* ap)
+{
+    Scanner scanner(formatstr);
     skipWhitespace(&scanner);
     char c = advance(&scanner);
     if ('(' == c)
     {
-        write_group(&scanner, &ap);
+        write_group(stream, &scanner, ap);
     }
-    va_end(ap);
-
-    std::cout << std::endl;
+    stream << std::endl;    
 }
 
 
-void write_group(Scanner* scanner, va_list* ap)
+void write_group(ostream& stream, Scanner* scanner, va_list* ap)
 {
     // consume open paren and following whitespace
     skipWhitespace(scanner);
@@ -188,7 +204,7 @@ void write_group(Scanner* scanner, va_list* ap)
     {
         char c = advance(scanner);
 
-        // std::cout << "scanning " << c << std::endl;
+        // stream << "scanning " << c << std::endl;
 
         // repeat count
         unsigned int repeat = 1;
@@ -207,7 +223,7 @@ void write_group(Scanner* scanner, va_list* ap)
             {
                 scanner->start = previous;
                 scanner->current = previous;
-                write_group(scanner, ap);    
+                write_group(stream, scanner, ap);    
             }
         }
         // edit descriptors
@@ -216,45 +232,45 @@ void write_group(Scanner* scanner, va_list* ap)
             switch(c)
             {
                 case 'I':
-                    write_i(scanner, ap, repeat); 
+                    write_i(stream, scanner, ap, repeat); 
                 break;
 
                 case 'F':
-                    write_f(scanner, ap, repeat); 
+                    write_f(stream, scanner, ap, repeat); 
                 break;
 
                 case 'D':
-                    write_d(scanner, ap, repeat); 
+                    write_d(stream, scanner, ap, repeat); 
                 break;
 
                 case 'E':
-                    write_e(scanner, ap, repeat); 
+                    write_e(stream, scanner, ap, repeat); 
                 break;
 
                 case 'G':
-                    write_g(scanner, ap, repeat); 
+                    write_g(stream, scanner, ap, repeat); 
                 break;
 
                 case 'L':
-                    write_l(scanner, ap, repeat); 
+                    write_l(stream, scanner, ap, repeat); 
                 break;
 
                 case 'A':
-                    write_a(scanner, ap, repeat); 
+                    write_a(stream, scanner, ap, repeat); 
                 break;
 
                 case 'X':
-                    write_x(scanner, repeat); 
+                    write_x(stream, scanner, repeat); 
                 break;
 
                 case 'H':
-                    write_h(scanner, repeat); 
+                    write_h(stream, scanner, repeat); 
                 break;
             }
         }
         else if ('\'' == c)
         {
-            write_str(scanner);
+            write_str(stream, scanner);
         }
         else if (')' == c)
         {
@@ -281,24 +297,32 @@ void write_group(Scanner* scanner, va_list* ap)
 // Format write edit descriptors
 //
 
-void write_i(Scanner* scanner, va_list* ap, size_t repeat)
+void write_i(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 {
     consume(scanner);
 
     int width = integer(scanner);
+    int atleast = 0;
     
+    if (peek(scanner) == '.')
+    {
+        advance(scanner);
+        consume(scanner);
+        atleast = integer(scanner);
+    }
+
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
         int value = va_arg(*ap, int); 
-        std::ios_base::fmtflags f(std::cout.flags());
-        std::cout << std::right << std::setw(width) << value;
-        std::cout.flags(f);  
+        std::ios_base::fmtflags f(stream.flags());
+        stream << std::right << std::setw(width) << value;
+        stream.flags(f);  
     }
 }
 
 
-void write_f(Scanner* scanner, va_list* ap, size_t repeat)
+void write_f(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 {
     consume(scanner);
 
@@ -317,35 +341,35 @@ void write_f(Scanner* scanner, va_list* ap, size_t repeat)
         char put[MAXLEN];
 
         format_f(put, value, width, decimal);  
-        std::ios_base::fmtflags f(std::cout.flags());
-        std::cout << std::setw(width) << std::right << put;
-        std::cout.flags(f);  
+        std::ios_base::fmtflags f(stream.flags());
+        stream << std::setw(width) << std::right << put;
+        stream.flags(f);  
     }
 }
 
 
-void write_d(Scanner* scanner, va_list* ap, size_t repeat)
+void write_d(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 {
     // partial support
-    write_f(scanner, ap, repeat);
+    write_f(stream, scanner, ap, repeat);
 }
 
 
-void write_e(Scanner* scanner, va_list* ap, size_t repeat)
+void write_e(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 {
     // partial support
-    write_f(scanner, ap, repeat);
+    write_f(stream, scanner, ap, repeat);
 }
 
 
-void write_g(Scanner* scanner, va_list* ap, size_t repeat)
+void write_g(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 {
     // partial support
-    write_f(scanner, ap, repeat);
+    write_f(stream, scanner, ap, repeat);
 }
 
 
-void write_l(Scanner* scanner, va_list* ap, size_t repeat)
+void write_l(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 {
     consume(scanner);
     int width = integer(scanner);
@@ -363,14 +387,14 @@ void write_l(Scanner* scanner, va_list* ap, size_t repeat)
         {
             valstr = 'F';   
         }
-        std::ios_base::fmtflags f(std::cout.flags());
-        std::cout << std::right << std::setw(width) << valstr;
-        std::cout.flags(f);
+        std::ios_base::fmtflags f(stream.flags());
+        stream << std::right << std::setw(width) << valstr;
+        stream.flags(f);
     }
 }
 
 
-void write_a(Scanner* scanner, va_list* ap, size_t repeat)
+void write_a(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 {
     consume(scanner);
     int width = 0;
@@ -384,38 +408,38 @@ void write_a(Scanner* scanner, va_list* ap, size_t repeat)
     {
         char const* value = va_arg(*ap, char const*); 
 
-        std::ios_base::fmtflags f(std::cout.flags());
+        std::ios_base::fmtflags f(stream.flags());
         if (width > 0)
         {
             char valsub[MAXLEN];
             strncpy(valsub, value, width);
             valsub[width] = '\0';
 
-            std::cout << std::setw(width);   
-            std::cout << valsub; 
+            stream << std::setw(width);   
+            stream << valsub; 
         }
         else
         {
-            std::cout << value;  
+            stream << value;  
         }
-        std::cout.flags(f);
+        stream.flags(f);
     }
 }
 
 
-void write_x(Scanner* scanner, size_t repeat)
+void write_x(ostream& stream, Scanner* scanner, size_t repeat)
 {
     consume(scanner); // consume X
 
     // print whitespace
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
-        std::cout << " ";
+        stream << " ";
     }
 }
 
 
-void write_str(Scanner* scanner)
+void write_str(ostream& stream, Scanner* scanner)
 {
     consume(scanner); // consume opening '
     for (;;)
@@ -439,11 +463,11 @@ void write_str(Scanner* scanner)
     consume(scanner); // consume last '
 
     // print user string
-    std::cout << valstr;
+    stream << valstr;
 }
 
 
-void write_h(Scanner* scanner, size_t length)
+void write_h(ostream& stream, Scanner* scanner, size_t length)
 {
     consume(scanner); // consume opening '
     for (size_t count = 0; count < length; ++count)
@@ -460,7 +484,7 @@ void write_h(Scanner* scanner, size_t length)
     consume(scanner); 
 
     // print user string
-    std::cout << valstr;
+    stream << valstr;
 }
 
 
@@ -486,7 +510,7 @@ void format_f(char* put, double value, size_t width, size_t precision)
     // whether the sign is present
     bool require_sign = value < 0; 
     // TODO: this test doesn't handle -0.0
-    // std::cout << "Sign" << require_sign << std::endl;
+    // stream << "Sign" << require_sign << std::endl;
 
     // the integer part output is optional when its = 0
     bool optional_intvalue = 0 == intval;

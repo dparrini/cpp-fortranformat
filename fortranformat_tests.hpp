@@ -25,9 +25,15 @@
 #define H_FORTRANFORMAT_TESTS__
 
 #include <cstdarg>
+#include <ostream>
+using std::ostream;
 
 
 void printfor(char const* formatstr, ...);
+
+void printfor(ostream& stream, char const* formatstr, ...);
+
+void stream_printfor(ostream& stream, char const* formatstr, va_list* ap);
 
 
 void tests();
@@ -43,18 +49,18 @@ struct Scanner {
 };
 
 
-void write_group(Scanner* scanner, va_list* ap);
-void write_i(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_f(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_d(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_e(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_g(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_l(Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_a(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_group(ostream& stream, Scanner* scanner, va_list* ap);
+void write_i(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_f(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_d(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_e(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_g(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_l(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_a(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
 
-void write_x(Scanner* scanner, size_t repeat = 1);
-void write_str(Scanner* scanner);
-void write_h(Scanner* scanner, size_t length);
+void write_x(ostream& stream, Scanner* scanner, size_t repeat = 1);
+void write_str(ostream& stream, Scanner* scanner);
+void write_h(ostream& stream, Scanner* scanner, size_t length);
 
 void format_f(char* put, double value, size_t width, size_t precision);
 size_t fast_10pow(size_t const exponent);

@@ -24,8 +24,11 @@
 #ifndef H_FORTRANFORMAT__
 #define H_FORTRANFORMAT__
 
+#include <ostream>
 
 void printfor(char const* formatstr, ...);
+
+void printfor(std::ostream& stream, char const* formatstr, ...);
 
 #ifdef DEBUG
 void tests();
