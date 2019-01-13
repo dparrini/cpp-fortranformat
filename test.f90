@@ -92,4 +92,9 @@ implicit none
     print *, "-------------"
     print "(A, 'test')", "different "
     print *, "--"
+
+    print *, "(5Htest , A), different"
+    print *, "-------------"
+    print "(5Htest , A)", "different"
+    print *, "--"
 end program hello

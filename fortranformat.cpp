@@ -28,6 +28,7 @@ void write_a(Scanner* scanner, va_list* ap, size_t repeat = 1);
 
 void write_x(Scanner* scanner, size_t repeat = 1);
 void write_str(Scanner* scanner);
+void write_h(Scanner* scanner, size_t length);
 
 void consume(Scanner* scanner);
 void extract(Scanner* scanner, char* put, size_t length);
@@ -126,6 +127,10 @@ void write_group(Scanner* scanner, va_list* ap)
 
                 case 'X':
                     write_x(scanner, repeat); 
+                break;
+
+                case 'H':
+                    write_h(scanner, repeat); 
                 break;
             }
         }
@@ -301,6 +306,27 @@ void write_str(Scanner* scanner)
 
     advance(scanner);
     consume(scanner); // consume last '
+
+    // print user string
+    std::cout << valstr;
+}
+
+
+void write_h(Scanner* scanner, size_t length)
+{
+    consume(scanner); // consume opening '
+    for (size_t count = 0; count < length; ++count)
+    {
+        // TODO: deal with '' escape. count it as 1 char.
+        advance(scanner);
+    }
+    // extract string before last '
+    char valstr[MAXLEN];
+    extract(scanner, valstr, MAXLEN);
+
+    // consume last '
+    advance(scanner);
+    consume(scanner); 
 
     // print user string
     std::cout << valstr;

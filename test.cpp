@@ -35,4 +35,5 @@ int main()
 	write("(3(I3, 3X))", 1, 2, 3);
 	write("(A, 'test')", "different ");
 	write("('test', A)", " different");
+	write("(5Htest , A)", "different");
 }

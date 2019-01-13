@@ -55,7 +55,7 @@ test:   1  2  3  4
 | Edit Descriptor      | Available? |
 |:---------------------|:----------:|
 | 'h h ... h ' 1 2 n   |    Partial |
-| nHh h ... h 1 2 n    |    No      |
+| nHh h ... h 1 2 n    |    Partial |
 | Tc                   |    No      |
 | TLc                  |    No      |
 | TRc                  |    No      |
@@ -69,6 +69,7 @@ test:   1  2  3  4
 | BN                   |    No      |
 | BZ                   |    No      |
 
+
 ## Issues
 
 ### `Fw.d`
@@ -77,6 +78,6 @@ test:   1  2  3  4
 the Fortran implementation prints with the number with the dot but no decimal
 numbers.
 
-### `'string'`
+### `'string'` and `nH`
 
 - Doesn't support escaping `''`.
