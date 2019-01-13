@@ -47,8 +47,19 @@ implicit none
     print "(A8)", "abcdefg"
     print *, "--"
 
-    print *, "(A3), abcdefg"
+    print *, "(1A3), abcdefg"
     print *, "-------------"
     print "(A3)", "abcdefg"
+    print *, "--"
+
+
+	print *, "(3I3), 1, 2, 3"
+    print *, "-------------"
+    print "(3I3)", 1, 2, 3
+    print *, "--"
+
+    print *, "(I3, I3, I3), 1, 2, 3"
+    print *, "-------------"
+    print "(I3, I3, I3)", 1, 2, 3
     print *, "--"
 end program hello

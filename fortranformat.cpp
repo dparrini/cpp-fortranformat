@@ -20,10 +20,10 @@ struct Scanner {
 };
 
 
-void  write_i(Scanner* scanner, va_list ap);
-void  write_f(Scanner* scanner, va_list ap);
-void  write_l(Scanner* scanner, va_list ap);
-void  write_a(Scanner* scanner, va_list ap);
+void  write_i(Scanner* scanner, va_list ap, size_t repeat = 1);
+void  write_f(Scanner* scanner, va_list ap, size_t repeat = 1);
+void  write_l(Scanner* scanner, va_list ap, size_t repeat = 1);
+void  write_a(Scanner* scanner, va_list ap, size_t repeat = 1);
 
 void consume(Scanner* scanner);
 void extract(Scanner* scanner, char* put, size_t length);
@@ -51,45 +51,52 @@ void tests()
 void write(char const* formatstr, ...)
 {
     Scanner scanner(formatstr);
-    unsigned int repeat = 0;
-
+    
     va_list ap;
     va_start(ap, formatstr);
     for (;;)
     {
         char c = advance(&scanner);
+
+        // repeat count
+        unsigned int repeat = 1;
+        if (isDigit(c))
+        {
+            repeat = integer(&scanner);
+            // TODO: repeat must be nonzero
+            c = advance(&scanner);
+        }
+
         // edit descriptors
         if (isAlpha(c))
         {
             switch(c)
             {
                 case 'I':
-                    write_i(&scanner, ap); 
+                    write_i(&scanner, ap, repeat); 
                 break;
 
                 case 'F':
-                    write_f(&scanner, ap); 
+                    write_f(&scanner, ap, repeat); 
                 break;
 
                 case 'L':
-                    write_l(&scanner, ap); 
+                    write_l(&scanner, ap, repeat); 
                 break;
 
                 case 'A':
-                    write_a(&scanner, ap); 
+                    write_a(&scanner, ap, repeat); 
                 break;
             }
-        }
-        // repeat number
-        if (isDigit(c))
-        {
-            repeat = integer(&scanner);
         }
 
         if (isAtEnd(&scanner))
         {
             break;
         }
+
+        // temporary solution, until its capable of interpreting (...)
+        consume(&scanner);
     }
     va_end(ap);
 
@@ -101,10 +108,8 @@ void write(char const* formatstr, ...)
 // Format write edit descriptors
 //
 
-void  write_i(Scanner* scanner, va_list ap)
+void  write_i(Scanner* scanner, va_list ap, size_t repeat)
 {
-    int value = va_arg(ap, int); 
-
     consume(scanner);
 
     int width = integer(scanner);
@@ -116,17 +121,20 @@ void  write_i(Scanner* scanner, va_list ap)
         consume(scanner);
         atleast = integer(scanner);
     }
-    // pop arg value
-    std::ios_base::fmtflags f(std::cout.flags());
-    std::cout << std::right << std::setw(width) << value;
-    std::cout.flags(f);
+
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        int value = va_arg(ap, int); 
+        std::ios_base::fmtflags f(std::cout.flags());
+        std::cout << std::right << std::setw(width) << value;
+        std::cout.flags(f);  
+    }
 }
 
 
-void  write_f(Scanner* scanner, va_list ap)
+void  write_f(Scanner* scanner, va_list ap, size_t repeat)
 {
-    double value = va_arg(ap, double); 
-
     consume(scanner);
 
     int width = integer(scanner);
@@ -137,69 +145,75 @@ void  write_f(Scanner* scanner, va_list ap)
     consume(scanner);
     decimal = integer(scanner);
     
-    // pop arg value
-    std::ios_base::fmtflags f(std::cout.flags());
-    std::cout << std::right;
-    std::cout.setf(std::ios::floatfield, std::ios::fixed);
-    std::cout << std::setw(width) << std::setprecision(decimal) << value; 
-    std::cout.flags(f);
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        double value = va_arg(ap, double); 
+        std::ios_base::fmtflags f(std::cout.flags());
+        std::cout << std::right;
+        std::cout.setf(std::ios::floatfield, std::ios::fixed);
+        std::cout << std::setw(width) << std::setprecision(decimal) << value; 
+        std::cout.flags(f);
+    }
 }
 
 
-void  write_l(Scanner* scanner, va_list ap)
+void  write_l(Scanner* scanner, va_list ap, size_t repeat)
 {
-    int value = va_arg(ap, int); 
-    char valstr;
-    if (value)
-    {
-        valstr = 'T';
-    }
-    else
-    {
-        valstr = 'F';   
-    }
-
     consume(scanner);
     int width = integer(scanner);
 
-    // pop arg value
-    std::ios_base::fmtflags f(std::cout.flags());
-    std::cout << std::right << std::setw(width) << valstr;
-    std::cout.flags(f);
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        int value = va_arg(ap, int); 
+        char valstr;
+        if (value)
+        {
+            valstr = 'T';
+        }
+        else
+        {
+            valstr = 'F';   
+        }
+        std::ios_base::fmtflags f(std::cout.flags());
+        std::cout << std::right << std::setw(width) << valstr;
+        std::cout.flags(f);
+    }
 }
 
 
-void  write_a(Scanner* scanner, va_list ap)
+void  write_a(Scanner* scanner, va_list ap, size_t repeat)
 {
-    char const* value = va_arg(ap, char const*); 
-    size_t len = strlen(value);
-
     consume(scanner);
     int width = 0;
     if (isDigit(peek(scanner)))
     {
         width = integer(scanner);
     }
-    else
-    {
-        // do something?
-    }
-    // pop arg value
-    std::ios_base::fmtflags f(std::cout.flags());
-    if (width > 0)
-    {
-        char valsub[MAXLEN];
-        strncpy(valsub, value, width);
-        valsub[width] = '\0';
 
-        std::cout << std::setw(width);   
-        std::cout << valsub; 
-    }
-    else
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
-        std::cout << value;  
+        char const* value = va_arg(ap, char const*); 
+        size_t len = strlen(value);
+
+        std::ios_base::fmtflags f(std::cout.flags());
+        if (width > 0)
+        {
+            char valsub[MAXLEN];
+            strncpy(valsub, value, width);
+            valsub[width] = '\0';
+
+            std::cout << std::setw(width);   
+            std::cout << valsub; 
+        }
+        else
+        {
+            std::cout << value;  
+        }
+        std::cout.flags(f);
     }
-    std::cout.flags(f);
 }
 
 
