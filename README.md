@@ -80,7 +80,7 @@ output is basic and don't reflect expected Fortran's. Such cases are `Dw.d` and
 
 ### `Fw.d`
 
-- Does not handle negative numbers as expected.
+- Does not handle `-0.0` as expected.
 
 ### `'string'` and `nH`
 

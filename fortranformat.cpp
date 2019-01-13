@@ -107,6 +107,30 @@ void tests()
     std::cout << put << std::endl;
     format_f(put, 100000003.0004, 10, 0); // 100000003.
     std::cout << put << std::endl;
+
+    // write
+    std::cout << std::endl;
+    std::cout << "Tests (negative write)" << std::endl;
+    format_f(put, -0.0, 1, 0); // -0.0 -> *
+    std::cout << put << std::endl;
+    format_f(put, -0.0, 2, 0); // -0.0 -> **
+    std::cout << put << std::endl;
+    format_f(put, -0.0, 3, 0); // -0.0 -> -0.
+    std::cout << put << std::endl;
+    format_f(put, -0.45, width-1, 3); // -0.450 -> *****
+    std::cout << put << std::endl;
+    format_f(put, -0.45, width, 3); // -0.450 -> -.450
+    std::cout << put << std::endl;
+    format_f(put, -0.45, width+1, 3); // -0.450 -> -0.450
+    std::cout << put << std::endl;
+    format_f(put, -11.3, width+1, 3); // -11.300 -> ******
+    std::cout << put << std::endl;
+    format_f(put, -100.7003, width+1, 1); // -100.700 -> -100.7
+    std::cout << put << std::endl;
+    format_f(put, -0.0235, width+1, 4); // -0.0235 -> -.0235
+    std::cout << put << std::endl;
+    format_f(put, -100000003.0004, 11, 0); // -100000003.
+    std::cout << put << std::endl;
 }
 
 
@@ -274,21 +298,11 @@ void write_f(Scanner* scanner, va_list* ap, size_t repeat)
     {
         double value = va_arg(*ap, double); 
         char put[MAXLEN];
-        if (value >= 0)
-        {
-            format_f(put, value, width, decimal);  
-            std::ios_base::fmtflags f(std::cout.flags());
-            std::cout << std::setw(width) << std::right << put;
-            std::cout.flags(f);  
-        }
-        else
-        {
-            std::ios_base::fmtflags f(std::cout.flags());
-            std::cout << std::right;
-            std::cout.setf(std::ios::floatfield, std::ios::fixed);
-            std::cout << std::setw(width) << std::setprecision(decimal) << value; 
-            std::cout.flags(f);  
-        }
+
+        format_f(put, value, width, decimal);  
+        std::ios_base::fmtflags f(std::cout.flags());
+        std::cout << std::setw(width) << std::right << put;
+        std::cout.flags(f);  
     }
 }
 
@@ -444,27 +458,41 @@ void format_f(char* put, double value, size_t width, size_t precision)
     const char DOT_CHAR = '.';
 
     // integer part
-    int intval = static_cast<int>(value);
+    int intval = abs(static_cast<int>(value));
     char intvalstr[MAXLEN];
     extract_integer_part(intvalstr, intval);
     size_t intlen = strlen(intvalstr);
 
     // fractional part
-    double fract = value - static_cast<double>(intval);
     char fractstr[MAXLEN];
-    extract_decimal_part(fractstr, fract, precision);
+    extract_decimal_part(fractstr, value, precision);
+
+    // whether the sign is present
+    bool require_sign = value < 0; 
+    // TODO: this test doesn't handle -0.0
+    // std::cout << "Sign" << require_sign << std::endl;
 
     // the integer part output is optional when its = 0
     bool optional_intvalue = 0 == intval;
 
+    size_t minimum_difference = 1 + require_sign;
+
     // the required string width, given the integral part, the dot and the 
     // precision
-    size_t strwidth = intlen + 1 + precision;
+    size_t strwidth = require_sign + intlen + 1 + precision;
 
     if (strwidth > width and strwidth - width == 1 and optional_intvalue and width != 1)
     {
         // omit integral part and then write the number
-        put[0] = DOT_CHAR;
+        size_t pos = 0;
+        if (require_sign)
+        {
+            put[pos] = '-';
+            pos = pos + 1;
+        }
+        put[pos] = DOT_CHAR;
+        pos = pos + 1;
+
         size_t const fraclen = strlen(fractstr);
         size_t const maxchars = width - 1; // max. chars that can be written
         size_t total = maxchars;
@@ -474,26 +502,32 @@ void format_f(char* put, double value, size_t width, size_t precision)
             total = fraclen;
         }
 
-        for (size_t pos = 1; pos < total + 1; ++pos)
+        for (; pos < total + 1 + require_sign; ++pos)
         {
-            put[pos] = fractstr[pos - 1];
+            put[pos] = fractstr[pos - 1 -require_sign];
         }
-        put[total + 1] = '\0';
+        put[total + 1 + require_sign] = '\0';
     }
     else if (strwidth <= width)
     {
         // write the number
-        // integral part
-        size_t pos;
-        for (pos = 0; pos < intlen; ++pos)
+        size_t pos = 0;
+        if (require_sign)
         {
-            put[pos] = intvalstr[pos];
+            put[pos] = '-';
+            pos = pos + 1;
         }
-        put[intlen] = DOT_CHAR;
+        // integral part
+        
+        for (; pos < intlen + require_sign; ++pos)
+        {
+            put[pos] = intvalstr[pos - require_sign];
+        }
+        put[intlen + require_sign] = DOT_CHAR;
         // fractional part
-        pos = intlen + 1;
+        pos = intlen + 1 + require_sign;
         size_t const fraclen = strlen(fractstr);
-        size_t const maxchars = width - intlen - 1; // max. chars that can be written
+        size_t const maxchars = width - intlen - 1 - require_sign; // max. chars that can be written
         size_t total = maxchars;
 
         if (fraclen < maxchars)
@@ -501,11 +535,11 @@ void format_f(char* put, double value, size_t width, size_t precision)
             total = fraclen;
         }
 
-        for (; pos < total + intlen + 1; ++pos)
+        for (; pos < total + intlen + 1 + require_sign; ++pos)
         {
-            put[pos] = fractstr[pos - intlen - 1];
+            put[pos] = fractstr[pos - intlen - 1 - require_sign];
         }
-        put[total + intlen + 1] = '\0';
+        put[total + intlen + 1 + require_sign] = '\0';
     }
     else
     {
@@ -579,15 +613,20 @@ void extract_integer_part(char* put, double value)
 
 void extract_decimal_part(char* put, double value, size_t precision)
 {
-    int intpart = static_cast<int>(value);
-    double decpart = value - intpart;
+    double absvalue = value;
+    if (absvalue < 0)
+    {
+        absvalue = -absvalue;
+    }
+    int intpart = static_cast<int>(absvalue);
+    double decpart = absvalue - intpart;
 
     // power of ten
     double power = 1;
     for (size_t pw = 1; pw <= precision; ++pw)
     {
         power = power * 10;
-        decpart = value * power - static_cast<int>(value*(power/10))*10;
+        decpart = absvalue * power - static_cast<int>(absvalue*(power/10))*10;
         intpart = static_cast<int>(decpart);
         put[pw-1] = intpart + '0';
     }
