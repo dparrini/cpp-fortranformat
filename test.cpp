@@ -14,8 +14,12 @@ int main()
 	write("(I5)", 5000);
 	write("(I5)", 23);
 	write("(I7.3)", 23);
+
 	write("(F7.3)", 3.001345);
 	write("(F7.0)", 3.001345);
+
+	write("(L7)", true);
+	write("(L7)", false);
 	// write("(I15, I15, I15)", 1, 0, 5);
 	// write("(3I15)", 1, 0, 5);
 }

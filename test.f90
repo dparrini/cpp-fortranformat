@@ -26,4 +26,14 @@ implicit none
     print *, "-------------"
     print "(F7.0)", 3.001345
     print *, "--"
+
+    print *, "(L4), true"
+    print *, "-------------"
+    print "(L4)", .TRUE.
+    print *, "--"
+
+    print *, "(L4), false"
+    print *, "-------------"
+    print "(L4)", .FALSE.
+    print *, "--"
 end program hello

@@ -22,6 +22,7 @@ struct Scanner {
 
 void  write_i(Scanner* scanner, va_list ap);
 void  write_f(Scanner* scanner, va_list ap);
+void  write_l(Scanner* scanner, va_list ap);
 
 void consume(Scanner* scanner);
 void extract(Scanner* scanner, char* put, size_t length);
@@ -61,12 +62,16 @@ void write(char const* formatstr, ...)
         {
             switch(c)
             {
+                case 'I':
+                    write_i(&scanner, ap); 
+                break;
+
                 case 'F':
                     write_f(&scanner, ap); 
                 break;
 
-                case 'I':
-                    write_i(&scanner, ap); 
+                case 'L':
+                    write_l(&scanner, ap); 
                 break;
             }
         }
@@ -132,6 +137,29 @@ void  write_f(Scanner* scanner, va_list ap)
     std::cout << std::right;
     std::cout.setf(std::ios::floatfield, std::ios::fixed);
     std::cout << std::setw(width) << std::setprecision(decimal) << value; 
+    std::cout.flags(f);
+}
+
+
+void  write_l(Scanner* scanner, va_list ap)
+{
+    int value = va_arg(ap, int); 
+    char valstr;
+    if (value)
+    {
+        valstr = 'T';
+    }
+    else
+    {
+        valstr = 'F';   
+    }
+
+    consume(scanner);
+    int width = integer(scanner);
+
+    // pop arg value
+    std::ios_base::fmtflags f(std::cout.flags());
+    std::cout << std::right << std::setw(width) << valstr;
     std::cout.flags(f);
 }
 
