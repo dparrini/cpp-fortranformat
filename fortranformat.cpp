@@ -45,39 +45,39 @@ struct Scanner {
     }
 };
 
-void stream_printfor(ostream& stream, char const* formatstr, va_list* ap);
+void stream_printfor(ostream&, char const*, va_list*);
 
 
-void write_group(ostream& stream, Scanner* scanner, va_list* ap);
-void write_i(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_f(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_d(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_e(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_g(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_l(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
-void write_a(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_group(ostream&, Scanner*, va_list*);
+void write_i(ostream&, Scanner*, va_list*, size_t repeat = 1);
+void write_f(ostream&, Scanner*, va_list*, size_t repeat = 1);
+void write_d(ostream&, Scanner*, va_list*, size_t repeat = 1);
+void write_e(ostream&, Scanner*, va_list*, size_t repeat = 1);
+void write_g(ostream&, Scanner*, va_list*, size_t repeat = 1);
+void write_l(ostream&, Scanner*, va_list*, size_t repeat = 1);
+void write_a(ostream&, Scanner*, va_list*, size_t repeat = 1);
 
-void write_x(ostream& stream, Scanner* scanner, size_t repeat = 1);
-void write_str(ostream& stream, Scanner* scanner);
-void write_h(ostream& stream, Scanner* scanner, size_t length);
+void write_x(ostream&, Scanner*, size_t repeat = 1);
+void write_str(ostream&, Scanner*);
+void write_h(ostream&, Scanner*, size_t);
 
-void format_f(char* put, double value, size_t width, size_t precision);
-size_t fast_10pow(size_t const exponent);
-size_t integer_str_length(unsigned int value);
-void extract_integer_part(char* put, double value);
-void extract_decimal_part(char* put, double value, size_t precision);
+void format_f(char*, double, size_t, size_t);
+size_t fast_10pow(size_t const);
+size_t integer_str_length(unsigned int);
+void extract_integer_part(char*, double);
+void extract_decimal_part(char*, double, size_t);
 
-void consume(Scanner* scanner);
-void extract(Scanner* scanner, char* put, size_t length);
-inline char advance(Scanner* scanner);
-bool match(Scanner* scanner, char expected);
-inline char peek(Scanner* scanner);
-inline char peekNext(Scanner* scanner);
-bool isAtEnd(Scanner* scanner);
-inline bool isDigit(char c);
-inline bool isAlpha(char c);
-int integer(Scanner* scanner);
-void skipWhitespace(Scanner* scanner);
+void consume(Scanner*);
+void extract(Scanner*, char*, size_t);
+inline char advance(Scanner*);
+bool match(Scanner*, char);
+inline char peek(Scanner*);
+inline char peekNext(Scanner*);
+bool isAtEnd(Scanner*);
+inline bool isDigit(char);
+inline bool isAlpha(char);
+int integer(Scanner*);
+void skipWhitespace(Scanner*);
 
 #endif
 
