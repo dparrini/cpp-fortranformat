@@ -18,7 +18,7 @@ Becomes this:
 
 void main()
 {
-	writer("(A, 2(I3, I3)", "test: ", 1, 2, 3, 4);
+    writer("(A, 2(I3, I3)", "test: ", 1, 2, 3, 4);
 }
 ```
 
@@ -33,7 +33,9 @@ test:   1  2  3  4
 
 ### Repeatable edit descriptor
 
+
 | Edit Descriptor | Available? |
+|:----------------|:----------:|
 | Iw              |    Yes     |
 | Iw.m            |    No      |
 | Fw.d            |    Yes     |
@@ -49,7 +51,9 @@ test:   1  2  3  4
 
 ### Nonrepeatable edit descriptor
 
+
 | Edit Descriptor      | Available? |
+|:---------------------|:----------:|
 | 'h h ... h ' 1 2 n   |    No      |
 | nHh h ... h 1 2 n    |    No      |
 | Tc                   |    No      |
