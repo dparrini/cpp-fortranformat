@@ -20,11 +20,11 @@ struct Scanner {
 };
 
 
-void  write_group(Scanner* scanner, va_list ap, size_t repeat = 1);
-void  write_i(Scanner* scanner, va_list ap, size_t repeat = 1);
-void  write_f(Scanner* scanner, va_list ap, size_t repeat = 1);
-void  write_l(Scanner* scanner, va_list ap, size_t repeat = 1);
-void  write_a(Scanner* scanner, va_list ap, size_t repeat = 1);
+void  write_group(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void  write_i(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void  write_f(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void  write_l(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void  write_a(Scanner* scanner, va_list* ap, size_t repeat = 1);
 
 void consume(Scanner* scanner);
 void extract(Scanner* scanner, char* put, size_t length);
@@ -60,7 +60,7 @@ void write(char const* formatstr, ...)
     char c = advance(&scanner);
     if ('(' == c)
     {
-        write_group(&scanner, ap, 1);
+        write_group(&scanner, &ap, 1);
     }
     va_end(ap);
 
@@ -68,7 +68,7 @@ void write(char const* formatstr, ...)
 }
 
 
-void write_group(Scanner* scanner, va_list ap, size_t repeat)
+void write_group(Scanner* scanner, va_list* ap, size_t repeat)
 {
     // consume open paren and following whitespace
     skipWhitespace(scanner);
@@ -116,13 +116,21 @@ void write_group(Scanner* scanner, va_list ap, size_t repeat)
         }
         else if (')' == c)
         {
+            consume(scanner);
             break;
+        }
+        else if (',' == c)
+        {
+            consume(scanner);
         }
 
         if (isAtEnd(scanner))
         {
             break;
         }
+
+        skipWhitespace(scanner);
+        consume(scanner);
     }
 }
 
@@ -131,7 +139,7 @@ void write_group(Scanner* scanner, va_list ap, size_t repeat)
 // Format write edit descriptors
 //
 
-void write_i(Scanner* scanner, va_list ap, size_t repeat)
+void write_i(Scanner* scanner, va_list* ap, size_t repeat)
 {
     consume(scanner);
 
@@ -148,7 +156,7 @@ void write_i(Scanner* scanner, va_list ap, size_t repeat)
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
-        int value = va_arg(ap, int); 
+        int value = va_arg(*ap, int); 
         std::ios_base::fmtflags f(std::cout.flags());
         std::cout << std::right << std::setw(width) << value;
         std::cout.flags(f);  
@@ -156,7 +164,7 @@ void write_i(Scanner* scanner, va_list ap, size_t repeat)
 }
 
 
-void write_f(Scanner* scanner, va_list ap, size_t repeat)
+void write_f(Scanner* scanner, va_list* ap, size_t repeat)
 {
     consume(scanner);
 
@@ -171,7 +179,7 @@ void write_f(Scanner* scanner, va_list ap, size_t repeat)
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
-        double value = va_arg(ap, double); 
+        double value = va_arg(*ap, double); 
         std::ios_base::fmtflags f(std::cout.flags());
         std::cout << std::right;
         std::cout.setf(std::ios::floatfield, std::ios::fixed);
@@ -181,7 +189,7 @@ void write_f(Scanner* scanner, va_list ap, size_t repeat)
 }
 
 
-void write_l(Scanner* scanner, va_list ap, size_t repeat)
+void write_l(Scanner* scanner, va_list* ap, size_t repeat)
 {
     consume(scanner);
     int width = integer(scanner);
@@ -189,7 +197,7 @@ void write_l(Scanner* scanner, va_list ap, size_t repeat)
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
-        int value = va_arg(ap, int); 
+        int value = va_arg(*ap, int); 
         char valstr;
         if (value)
         {
@@ -206,7 +214,7 @@ void write_l(Scanner* scanner, va_list ap, size_t repeat)
 }
 
 
-void write_a(Scanner* scanner, va_list ap, size_t repeat)
+void write_a(Scanner* scanner, va_list* ap, size_t repeat)
 {
     consume(scanner);
     int width = 0;
@@ -218,7 +226,7 @@ void write_a(Scanner* scanner, va_list ap, size_t repeat)
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
-        char const* value = va_arg(ap, char const*); 
+        char const* value = va_arg(*ap, char const*); 
         size_t len = strlen(value);
 
         std::ios_base::fmtflags f(std::cout.flags());

@@ -28,7 +28,7 @@ int main()
 	write("(3I3)", 1, 2, 3);
 	write("  (((  3I3  )))  ", 1, 2, 3);
 	write("(3I3) ignored", 1, 2, 3);
-	write("(3A10)", "teste1", "teste2", "teste3");
-	// write("(I15, I15, I15)", 1, 0, 5);
+	write("(3A10)", "test1", "test2", "test3");
+	write("(I15, I15, I15)", 1, 0, 5);
 	// write("(3I15)", 1, 0, 5);
 }
