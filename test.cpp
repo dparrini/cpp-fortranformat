@@ -32,4 +32,5 @@ int main()
 	write("(I15, I15, I15)", 1, 0, 5);
 	write("(A, 2(I15, I3))", "test", 1, 0, 5, 7);
 	write("(3(I3)) ignored", 1, 2, 3);
+	write("(3(I3, 3X))", 1, 2, 3);
 }

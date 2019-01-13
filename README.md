@@ -31,7 +31,7 @@ test:   1  2  3  4
 ## Supported Features
 
 
-### Repeatable edit descriptor
+### Repeatable edit descriptors
 
 
 | Edit Descriptor | Available? |
@@ -49,7 +49,7 @@ test:   1  2  3  4
 | Aw              |    Yes     |
 
 
-### Nonrepeatable edit descriptor
+### Nonrepeatable edit descriptors
 
 
 | Edit Descriptor      | Available? |
@@ -59,7 +59,7 @@ test:   1  2  3  4
 | Tc                   |    No      |
 | TLc                  |    No      |
 | TRc                  |    No      |
-| nX                   |    No      |
+| nX                   |    Yes     |
 | /                    |    No      |
 | :                    |    No      |
 | S                    |    No      |

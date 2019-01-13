@@ -82,4 +82,9 @@ implicit none
     print *, "-------------"
     print "(I3, I3, I3)", 1, 2, 3
     print *, "--"
+
+    print *, "(3(I3, 3X)), 1, 2, 3"
+    print *, "-------------"
+    print "(3(I3, 3X))", 1, 2, 3
+    print *, "--"
 end program hello

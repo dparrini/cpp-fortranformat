@@ -26,6 +26,8 @@ void  write_f(Scanner* scanner, va_list* ap, size_t repeat = 1);
 void  write_l(Scanner* scanner, va_list* ap, size_t repeat = 1);
 void  write_a(Scanner* scanner, va_list* ap, size_t repeat = 1);
 
+void  write_x(Scanner* scanner, size_t repeat = 1);
+
 void consume(Scanner* scanner);
 void extract(Scanner* scanner, char* put, size_t length);
 inline char advance(Scanner* scanner);
@@ -117,6 +119,10 @@ void write_group(Scanner* scanner, va_list* ap)
 
                 case 'A':
                     write_a(scanner, ap, repeat); 
+                break;
+
+                case 'X':
+                    write_x(scanner, repeat); 
                 break;
             }
         }
@@ -250,6 +256,18 @@ void write_a(Scanner* scanner, va_list* ap, size_t repeat)
             std::cout << value;  
         }
         std::cout.flags(f);
+    }
+}
+
+
+void write_x(Scanner* scanner, size_t repeat)
+{
+    consume(scanner); // consume X
+
+    // print whitespace
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        std::cout << " ";
     }
 }
 
