@@ -20,7 +20,7 @@ struct Scanner {
 };
 
 
-void  write_group(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void  write_group(Scanner* scanner, va_list* ap);
 void  write_i(Scanner* scanner, va_list* ap, size_t repeat = 1);
 void  write_f(Scanner* scanner, va_list* ap, size_t repeat = 1);
 void  write_l(Scanner* scanner, va_list* ap, size_t repeat = 1);
@@ -60,7 +60,7 @@ void write(char const* formatstr, ...)
     char c = advance(&scanner);
     if ('(' == c)
     {
-        write_group(&scanner, &ap, 1);
+        write_group(&scanner, &ap);
     }
     va_end(ap);
 
@@ -68,7 +68,7 @@ void write(char const* formatstr, ...)
 }
 
 
-void write_group(Scanner* scanner, va_list* ap, size_t repeat)
+void write_group(Scanner* scanner, va_list* ap)
 {
     // consume open paren and following whitespace
     skipWhitespace(scanner);
@@ -90,7 +90,13 @@ void write_group(Scanner* scanner, va_list* ap, size_t repeat)
         // nested group
         if ('(' == c)
         {
-            write_group(scanner, ap, repeat);
+            char const* previous = scanner->current;
+            for (size_t repcount = 0; repcount < repeat; ++repcount)
+            {
+                scanner->start = previous;
+                scanner->current = previous;
+                write_group(scanner, ap);    
+            }
         }
         // edit descriptors
         else if (isAlpha(c))

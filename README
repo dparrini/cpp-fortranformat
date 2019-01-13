@@ -1,5 +1,32 @@
 # C++ Fortran Format
 
+## Usage
+
+Something like this:
+
+```f90
+program formt
+implicit none
+    print "(A, 2(I3, I3)", 1, 2, 3, 4
+end program formt
+```
+
+Becomes this:
+
+```cpp
+#include "fortranformat.hpp"
+
+void main()
+{
+	writer("(A, 2(I3, I3)", "test: ", 1, 2, 3, 4);
+}
+```
+
+Output:
+
+```
+test:   1  2  3  4
+```
 
 ## Supported Features
 
@@ -7,17 +34,17 @@
 ### Repeatable edit descriptor
 
 | Edit Descriptor | Available? |
-| Iw              |    Yes     |                    
-| Iw.m            |    No      |                      
-| Fw.d            |    Yes     |                      
-| Ew.d            |    No      |                      
-| Ew.dEe          |    No      |                        
-| Dw.d            |    No      |                      
-| Gw.d            |    No      |                      
-| Gw.dEe          |    No      |                        
-| Lw              |    Yes     |                    
-| A               |    Yes     |                   
-| Aw              |    Yes     |                    
+| Iw              |    Yes     |
+| Iw.m            |    No      |
+| Fw.d            |    Yes     |
+| Ew.d            |    No      |
+| Ew.dEe          |    No      |
+| Dw.d            |    No      |
+| Gw.d            |    No      |
+| Gw.dEe          |    No      |
+| Lw              |    Yes     |
+| A               |    Yes     |
+| Aw              |    Yes     |
 
 
 ### Nonrepeatable edit descriptor
