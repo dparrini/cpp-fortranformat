@@ -97,4 +97,24 @@ implicit none
     print *, "-------------"
     print "(5Htest , A)", "different"
     print *, "--"
+
+    print *, "(F10.3), 3.001345"
+    print *, "-------------"
+    print "(F10.3)", 3.001345
+    print *, "--"
+
+    print *, "(D10.3), 3.001345"
+    print *, "-------------"
+    print "(D10.3)", 3.001345
+    print *, "--"
+
+    print *, "(E10.3), 3.001345"
+    print *, "-------------"
+    print "(E10.3)", 3.001345
+    print *, "--"
+
+    print *, "(G10.3), 3.001345"
+    print *, "-------------"
+    print "(G10.3)", 3.001345
+    print *, "--"
 end program hello

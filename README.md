@@ -7,7 +7,7 @@ Something like this:
 ```f90
 program formt
 implicit none
-    print "(A, 2(I3, I3)", 1, 2, 3, 4
+    print "(A, 2(I3, I3)", "test", 1, 2, 3, 4
 end program formt
 ```
 
@@ -30,6 +30,12 @@ test:   1  2  3  4
 
 ## Supported Features
 
+Some descriptors are fully supported (`Iw`), while others are Partial. This means
+that the formating in some cases may not reflect expected Fortran's. 
+
+Descriptors specified as "Recognized" are read from the format string but its 
+output is basic and don't reflect expected Fortran's. Such cases are `Dw.d` and
+`Gw.d`, which output were made equal to `Fw.d` (which is incorrect).
 
 ### Repeatable edit descriptors
 
@@ -38,11 +44,11 @@ test:   1  2  3  4
 |:----------------|:----------:|
 | Iw              |    Yes     |
 | Iw.m            |    No      |
-| Fw.d            |    Yes     |
-| Ew.d            |    No      |
+| Fw.d            |    Partial |
+| Ew.d            | Recognized |
 | Ew.dEe          |    No      |
-| Dw.d            |    No      |
-| Gw.d            |    No      |
+| Dw.d            | Recognized |
+| Gw.d            | Recognized |
 | Gw.dEe          |    No      |
 | Lw              |    Yes     |
 | A               |    Yes     |

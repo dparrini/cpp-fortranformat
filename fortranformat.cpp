@@ -23,6 +23,9 @@ struct Scanner {
 void write_group(Scanner* scanner, va_list* ap);
 void write_i(Scanner* scanner, va_list* ap, size_t repeat = 1);
 void write_f(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_d(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_e(Scanner* scanner, va_list* ap, size_t repeat = 1);
+void write_g(Scanner* scanner, va_list* ap, size_t repeat = 1);
 void write_l(Scanner* scanner, va_list* ap, size_t repeat = 1);
 void write_a(Scanner* scanner, va_list* ap, size_t repeat = 1);
 
@@ -115,6 +118,18 @@ void write_group(Scanner* scanner, va_list* ap)
 
                 case 'F':
                     write_f(scanner, ap, repeat); 
+                break;
+
+                case 'D':
+                    write_d(scanner, ap, repeat); 
+                break;
+
+                case 'E':
+                    write_e(scanner, ap, repeat); 
+                break;
+
+                case 'G':
+                    write_g(scanner, ap, repeat); 
                 break;
 
                 case 'L':
@@ -210,6 +225,27 @@ void write_f(Scanner* scanner, va_list* ap, size_t repeat)
         std::cout << std::setw(width) << std::setprecision(decimal) << value; 
         std::cout.flags(f);
     }
+}
+
+
+void write_d(Scanner* scanner, va_list* ap, size_t repeat)
+{
+    // partial support
+    write_f(scanner, ap, repeat);
+}
+
+
+void write_e(Scanner* scanner, va_list* ap, size_t repeat)
+{
+    // partial support
+    write_f(scanner, ap, repeat);
+}
+
+
+void write_g(Scanner* scanner, va_list* ap, size_t repeat)
+{
+    // partial support
+    write_f(scanner, ap, repeat);
 }
 
 

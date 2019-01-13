@@ -36,4 +36,13 @@ int main()
 	write("(A, 'test')", "different ");
 	write("('test', A)", " different");
 	write("(5Htest , A)", "different");
+	
+	std::cout << "F ";
+	write("(F10.3)", 3.001345);
+	std::cout << "D ";
+	write("(D10.3)", 3.001345);
+	std::cout << "E ";
+	write("(E10.3)", 3.001345);
+	std::cout << "G ";
+	write("(G10.3)", 3.001345);
 }
