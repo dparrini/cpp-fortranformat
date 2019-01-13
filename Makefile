@@ -19,6 +19,10 @@ $(OBJDIR)/%.o: %.cpp $(DEPS)
 	mkdir -p $(OBJDIR)
 	$(CXX) -c -o $@ $< $(CXXFLAGS) $(OPTIONS)
 
+$(OBJDIR)/%.o: tests/%.cpp $(DEPS)
+	mkdir -p $(OBJDIR)
+	$(CXX) -c -o $@ $< $(CXXFLAGS) $(OPTIONS)
+
 $(BINTARGET): $(EXAMPLE_OBJS)
 	mkdir -p $(OUTDIR)
 	$(CXX) -o $(OUTDIR)/$@.exe $^ $(CXXFLAGS)
@@ -44,8 +48,8 @@ testf : $(FOBJ)
 .PHONY : clean
 
 clean:
-	rm -r $(OUTDIR)/test.exe
-	rm -r $(OUTDIR)/testf.exe
-	rm -r $(OUTDIR)/$(BINTARGET).exe
-	rm -r $(OBJDIR)/*.o
-	rm -r $(OBJDIR)/*.of
+	rm -f $(OUTDIR)/test.exe
+	rm -f $(OUTDIR)/testf.exe
+	rm -f $(OUTDIR)/$(BINTARGET).exe
+	rm -f $(OBJDIR)/*.o
+	rm -f $(OBJDIR)/*.of

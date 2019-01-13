@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 #include "fortranformat_tests.hpp"
-#include "tests/acutest.h"
+#include "acutest.h"
 
 
 void test_basic();
