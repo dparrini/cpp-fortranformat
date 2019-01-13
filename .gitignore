@@ -2,3 +2,4 @@ obj/
 bin/
 *.bat
 *.sh
+*.html
