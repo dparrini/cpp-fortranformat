@@ -1,8 +1,18 @@
 #include <iostream>
-#include "fortranformat.hpp"
+#include "fortranformat_tests.hpp"
+#include "tests/acutest.h"
 
 
-int main()
+void test_basic(void);
+
+
+TEST_LIST = {
+	{ "basic", test_basic },
+	{0}
+};
+
+
+void test_basic(void)
 {
 	#ifdef DEBUG
 	std::cout << "Internal tests" << std::endl;
@@ -47,4 +57,6 @@ int main()
 	printfor("(G10.3)", 3.001345);
 
 	printfor("(F10.3)", -3.001345);
+
+	TEST_CHECK(true);
 }

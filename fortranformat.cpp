@@ -28,9 +28,9 @@
 #include <iostream>
 #include "fortranformat.hpp"
 
-
 size_t const MAXLEN = 200;
 
+#ifndef DEBUG
 
 struct Scanner {
     const char* start;
@@ -74,6 +74,8 @@ inline bool isDigit(char c);
 inline bool isAlpha(char c);
 int integer(Scanner* scanner);
 void skipWhitespace(Scanner* scanner);
+
+#endif
 
 
 void tests()

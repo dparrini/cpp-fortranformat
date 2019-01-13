@@ -1,30 +1,37 @@
 CXX=g++
-CXXFLAGS=-std=c++11 -Wall -g
+CXXFLAGS=-std=gnu++11 -Wall -g
 FC=gfortran
 
 OUTDIR=bin
-BINTARGET=test
-OPTIONS= -DDEBUG
+BINTARGET=example
 
 DEPS=fortranformat.hpp
 
 OBJDIR=obj
-CPPOBJ=$(OBJDIR)/fortranformat.o \
-	   $(OBJDIR)/test.o
+CPPOBJ=$(OBJDIR)/fortranformat.o
+EXAMPLE_OBJS=$(CPPOBJ) $(OBJDIR)/example.o
+TEST_OBJS=$(CPPOBJ) $(OBJDIR)/test.o
 
 FOBJ=$(OBJDIR)/test.of
 
+# module and example
 $(OBJDIR)/%.o: %.cpp $(DEPS)
 	mkdir -p $(OBJDIR)
 	$(CXX) -c -o $@ $< $(CXXFLAGS) $(OPTIONS)
 
-$(BINTARGET): $(CPPOBJ)
+$(BINTARGET): $(EXAMPLE_OBJS)
 	mkdir -p $(OUTDIR)
-	$(CXX) -o $(OUTDIR)/$@.exe $^ $(CXXFLAGS) $(OPTIONS)
+	$(CXX) -o $(OUTDIR)/$@.exe $^ $(CXXFLAGS)
 
 all: $(BINTARGET)
 
 
+# CPP tests
+test: $(TEST_OBJS)
+	mkdir -p $(OUTDIR)
+	$(CXX) -o $(OUTDIR)/$@.exe $^ $(CXXFLAGS) -DDEBUG
+
+# fortran tests
 $(OBJDIR)/%.of: %.f90
 	mkdir -p $(OBJDIR)
 	$(FC) -c -o $@ $< $(FFLAGS) $(FOPTIONS)
@@ -37,5 +44,8 @@ testf : $(FOBJ)
 .PHONY : clean
 
 clean:
+	rm $(OUTDIR)/test.exe
+	rm $(OUTDIR)/testf.exe
 	rm $(OUTDIR)/$(BINTARGET).exe
 	rm $(OBJDIR)/*.o
+	rm $(OBJDIR)/*.of
