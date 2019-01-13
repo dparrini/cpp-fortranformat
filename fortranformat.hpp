@@ -9,7 +9,7 @@ union values_t
 };
 
 
-void write(char const* formatstr ...);
+void write(char const* formatstr, ...);
 
 #ifdef DEBUG
 

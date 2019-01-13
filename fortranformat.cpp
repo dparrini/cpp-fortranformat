@@ -20,7 +20,8 @@ struct Scanner {
 };
 
 
-void  write_i(Scanner* scanner, int poppedValue);
+void  write_i(Scanner* scanner, va_list ap);
+void  write_f(Scanner* scanner, va_list ap);
 
 void consume(Scanner* scanner);
 void extract(Scanner* scanner, char* put, size_t length);
@@ -45,7 +46,7 @@ void tests()
 }
 
 
-void write(char const* formatstr ...)
+void write(char const* formatstr, ...)
 {
     Scanner scanner(formatstr);
     unsigned int repeat = 0;
@@ -60,9 +61,12 @@ void write(char const* formatstr ...)
         {
             switch(c)
             {
+                case 'F':
+                    write_f(&scanner, ap); 
+                break;
+
                 case 'I':
-                    int value = va_arg(ap, int); 
-                    write_i(&scanner, value); 
+                    write_i(&scanner, ap); 
                 break;
             }
         }
@@ -87,8 +91,10 @@ void write(char const* formatstr ...)
 // Format write edit descriptors
 //
 
-void  write_i(Scanner* scanner, int poppedValue)
+void  write_i(Scanner* scanner, va_list ap)
 {
+    int value = va_arg(ap, int); 
+
     consume(scanner);
 
     int width = integer(scanner);
@@ -101,7 +107,32 @@ void  write_i(Scanner* scanner, int poppedValue)
         atleast = integer(scanner);
     }
     // pop arg value
-    std::cout << std::right << std::setw(width) << poppedValue;
+    std::ios_base::fmtflags f(std::cout.flags());
+    std::cout << std::right << std::setw(width) << value;
+    std::cout.flags(f);
+}
+
+
+void  write_f(Scanner* scanner, va_list ap)
+{
+    double value = va_arg(ap, double); 
+
+    consume(scanner);
+
+    int width = integer(scanner);
+    int decimal = 0;
+
+    // dot character
+    advance(scanner); 
+    consume(scanner);
+    decimal = integer(scanner);
+    
+    // pop arg value
+    std::ios_base::fmtflags f(std::cout.flags());
+    std::cout << std::right;
+    std::cout.setf(std::ios::floatfield, std::ios::fixed);
+    std::cout << std::setw(width) << std::setprecision(decimal) << value; 
+    std::cout.flags(f);
 }
 
 
