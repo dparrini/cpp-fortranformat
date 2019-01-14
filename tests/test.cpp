@@ -61,6 +61,32 @@ void test_basic()
     char cs[MAXLEN];
     zerostr(cs);
 
+    format_i(cs, 10, 3, 3); // 010
+    std::cout << cs << std::endl;
+
+    format_i(cs, -10, 3, 3); // ***
+    std::cout << cs << std::endl;
+
+    format_i(cs, -1, 4, 3); // -001
+    std::cout << cs << std::endl;
+
+    format_i(cs, -1, 7, 3); // ___-001
+    std::cout << cs << std::endl;
+
+    format_d(cs, 1234.678, 9, 3); // 0.123D+04
+    std::cout << cs << std::endl;
+
+    format_d(cs, 1234.678, 8, 4); // ********
+    std::cout << cs << std::endl;
+    format_d(cs, 1234.678, 13, 4); // ___0.1235D+04
+    std::cout << cs << std::endl;
+    format_d(cs, -1234.678, 13, 4); // __-0.1235D+04
+    std::cout << cs << std::endl;
+
+    format_d(cs, -1234.678, 13, 5); // __-0.1235D+04
+    std::cout << cs << std::endl;
+
+
     // fractional part extraction
     extract_decimal_part(cs, 3.14, 2);
     TEST_CHECK(compare_strings(cs, "14"));
@@ -101,6 +127,15 @@ void test_basic()
     extract_integer_part(cs, 100000003.0004);
     TEST_CHECK(compare_strings(cs, "100000003"));
     zerostr(cs);
+
+    // fractional zeroes
+    TEST_CHECK(frac_zeroes(2.0) == 0);
+    TEST_CHECK(frac_zeroes(0.3) == 0);
+    TEST_CHECK(frac_zeroes(0.02) == 1);
+    TEST_CHECK(frac_zeroes(0.004) == 2);
+    TEST_CHECK(frac_zeroes(-0.0005) == 3);
+    TEST_CHECK(frac_zeroes(0.00001) == 4);
+    TEST_CHECK(frac_zeroes(1.0E-08) == 9);
 }
 
 
@@ -138,6 +173,15 @@ void test_float()
 
     printfor(ss, "(F7.3, 1X, F5.3, 1X, F4.3)", 3.001345, 3.001345, 3.001345);
     TEST_CHECK(compare_strings(ss.str().c_str(), "  3.001 3.001 ****"));
+    ss.str(std::string());
+
+    // D and E
+    printfor(ss, "(D9.3, 1X, D8.4, 1X, D13.4)", 1234.678, 1234.678 , 1234.678 );
+    TEST_CHECK(compare_strings(ss.str().c_str(), "0.123D+04 ********    0.1235D+04"));
+    ss.str(std::string());
+
+    printfor(ss, "( E10.3, E11.4, E13.6 )", 12345678.0, 23.5678, 0.345678 );
+    TEST_CHECK(compare_strings(ss.str().c_str(), " 0.123E+08 0.2357E+02 0.345678E+00"));
     ss.str(std::string());
 }
 

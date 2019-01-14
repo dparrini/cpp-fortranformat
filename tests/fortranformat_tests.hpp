@@ -62,9 +62,12 @@ void write_x(ostream&, Scanner*, size_t repeat = 1);
 void write_str(ostream&, Scanner*);
 void write_h(ostream&, Scanner*, size_t);
 
+void format_i(char*, int, size_t, size_t);
 void format_f(char*, double, size_t, size_t);
+void format_d(char*, double, size_t, size_t, char expchar = 'D');
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int);
+size_t frac_zeroes(double);
 void extract_integer_part(char*, double);
 void extract_decimal_part(char*, double, size_t);
 

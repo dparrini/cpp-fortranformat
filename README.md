@@ -9,7 +9,7 @@ printfor("(I3, 2(1X, F4.2))", 10, 3.1416, 3.333);
 //  10 3.14 3.33
 ```
 
-In this version, only `Iw`, `Fw.d`, `Lw`, `A[w]`, `nX`, `/`, `nH`, and `''`
+In this version, only `Iw`, `Fw.d`, `Dw.d`, `Ew.d`, `Lw`, `A[w]`, `nX`, `/`, `nH`, and `''`
 [edit descriptors](http://www.fortran.com/fortran/F77_std/rjcnf0001-sh-13.html#sh-13.5.6) are supported. Both grouping `()` and repeat specification are supported also.
 Currently, the output goes directly to the output stream (stdout) or to a user specified output stream (with `ostream` base class). 
 
@@ -59,20 +59,19 @@ that the formatting in some cases may not reflect expected Fortran's. The follow
 summarize the availability of each edit descriptor.
 
 Descriptors specified as "Recognized" are read from the format string but its 
-output is basic and don't reflect expected Fortran's. Such cases are `Dw.d` and
-`Gw.d`, which output were made equal to `Fw.d` (which is incorrect).
+output is basic and don't reflect expected Fortran's. Such cases are of the `Gw.d`, which output were made equal to `Fw.d` (which is incorrect).
+
 
 ### Repeatable edit descriptors
-
 
 | Edit Descriptor | Available? |
 |:----------------|:----------:|
 | Iw              |    Yes     |
 | Iw.m            |    No      |
 | Fw.d            |    Yes     |
-| Ew.d            | Recognized |
+| Ew.d            |    Yes     |
 | Ew.dEe          |    No      |
-| Dw.d            | Recognized |
+| Dw.d            |    Yes     |
 | Gw.d            | Recognized |
 | Gw.dEe          |    No      |
 | Lw              |    Yes     |
@@ -103,9 +102,11 @@ output is basic and don't reflect expected Fortran's. Such cases are `Dw.d` and
 
 ### Known Issues
 
-#### `Fw.d`
+#### Real numbers edit descriptors
 
 - Does not handle `-0.0` as expected.
+- Last digit of `Dw.d` and `Ew.d` mantissa is truncated, where in the Fortran's 
+  implementation it is rounded.
 
 #### `'string'` and `nH`
 

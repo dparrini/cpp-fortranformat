@@ -62,9 +62,12 @@ void write_str(ostream&, Scanner*);
 void write_nl(ostream&, Scanner*);
 void write_h(ostream&, Scanner*, size_t);
 
+void format_i(char*, int, size_t, size_t);
 void format_f(char*, double, size_t, size_t);
+void format_d(char*, double, size_t, size_t, char expchar = 'D');
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int);
+size_t frac_zeroes(double);
 void extract_integer_part(char*, double);
 void extract_decimal_part(char*, double, size_t);
 
@@ -274,15 +277,51 @@ void write_f(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 
 void write_d(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 {
-    // partial support
-    write_f(stream, scanner, ap, repeat);
+    // TODO: similar to write_e
+    consume(scanner);
+
+    int width = integer(scanner);
+    int decimal = 0;
+
+    // dot character
+    advance(scanner); 
+    consume(scanner);
+    decimal = integer(scanner);
+    
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        double value = va_arg(*ap, double); 
+        char put[MAXLEN];
+
+        format_d(put, value, width, decimal, 'D');  
+        stream << put;
+    }
 }
 
 
 void write_e(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 {
-    // partial support
-    write_f(stream, scanner, ap, repeat);
+    // TODO: similar to write_d
+    consume(scanner);
+
+    int width = integer(scanner);
+    int decimal = 0;
+
+    // dot character
+    advance(scanner); 
+    consume(scanner);
+    decimal = integer(scanner);
+    
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        double value = va_arg(*ap, double); 
+        char put[MAXLEN];
+
+        format_d(put, value, width, decimal, 'E');  
+        stream << put;
+    }
 }
 
 
@@ -420,8 +459,68 @@ void write_h(ostream& stream, Scanner* scanner, size_t length)
 
 
 //
-// Number formating
+// Number formatting
 //
+
+void format_i(char* put, int value, size_t width, size_t fill)
+{
+    unsigned int absvalue = abs(value);
+
+    size_t len = integer_str_length(absvalue);
+
+    bool require_sign = value < 0;
+    bool fill_chars   = len < fill;
+
+    size_t maxlen = len + require_sign + fill_chars*(fill - len);
+
+    size_t pos = 0;
+    if (maxlen > width)
+    {
+        // TODO: can be refactored
+        for (; pos < width; ++pos)
+        {
+            put[pos] = '*';
+        }
+    }
+    else
+    {
+        // right-alignment whitespace
+        for (;pos < width - maxlen; ++pos)
+        {
+            put[pos] = ' ';
+        }
+
+        // minus sign
+        if (require_sign)
+        {
+            put[pos] = '-';
+            pos = pos + 1;
+        }
+
+        // leading zeroes
+        if (fill_chars)
+        {
+            for (size_t fillcount = 0; fillcount < fill - len; ++fillcount, ++pos)
+            {
+                put[pos] = '0';
+            }
+        }
+
+        // integer
+        // TODO: can be refactored, see extract_integer_part
+        unsigned int intpart = abs(static_cast<int>(value));
+        for(size_t n = 0; n < len; ++n, ++pos)
+        {
+            size_t power = fast_10pow(len - n - 1);
+            unsigned int newvalue = static_cast<int>(intpart / power);
+            put[pos] = newvalue + '0';
+
+            intpart = intpart - newvalue * power;
+        }
+    }
+    put[pos] = '\0'; 
+}
+
 
 void format_f(char* put, double value, size_t width, size_t precision)
 {
@@ -522,6 +621,107 @@ void format_f(char* put, double value, size_t width, size_t precision)
 }
 
 
+void format_d(char* put, double value, size_t width, size_t precision, char expchar)
+{
+    double absvalue = value;
+    if (value < 0)
+    {
+        absvalue = -value;
+    }
+    bool require_sign = value < 0;
+
+    // 0. precision D+00
+    size_t const FORMATCHARS = 6;
+    size_t maxlen = require_sign + FORMATCHARS + precision;
+
+    size_t pos = 0;
+    if (maxlen > width)
+    {
+        // TODO: can be refactored
+        for (; pos < width; ++pos)
+        {
+            put[pos] = '*';
+        }
+    }
+    else
+    {
+        // calculate the decimal part and the exponent
+        double finalnumber;
+        int exponent;
+        double power;
+        if (absvalue >= 1)
+        {
+            // numbers with the integer part
+            unsigned int intval = static_cast<unsigned int>(absvalue);
+            exponent = integer_str_length(intval);
+
+            if (exponent >= precision)
+            {
+                power = 1.0 / static_cast<double>(fast_10pow(exponent - precision));
+            }
+            else
+            {
+                power = static_cast<double>(fast_10pow(precision - exponent));
+            }
+        }
+        else
+        {
+            // numbers of zeroes in the fractional part
+            exponent = frac_zeroes(absvalue);
+            power = static_cast<double>(fast_10pow(exponent + precision));
+
+            exponent = - exponent;
+        }
+        // final number after the decimal separator
+        finalnumber = absvalue * power;
+        unsigned int intval = static_cast<unsigned int>(finalnumber);
+
+        // right-alignment whitespace
+        if (width > maxlen)
+        {
+            for (;pos < width - maxlen; ++pos)
+            {
+                put[pos] = ' ';
+            } 
+        }
+
+        // minus sign
+        if (require_sign)
+        {
+            put[pos] = '-';
+            pos = pos + 1;
+        }
+
+        // leading zero and dot
+        put[pos]     = '0';
+        put[pos + 1] = '.';
+        pos = pos + 2;
+
+        // number value
+        format_i(put + pos, intval, precision, 0);
+        pos = pos + precision;
+
+        // exponent sign
+        put[pos] = expchar;
+        pos = pos + 1;
+        if (exponent >= 0.0)
+        {
+            put[pos] = '+';
+        }
+        else
+        {
+            put[pos] = '-';
+        }
+        pos = pos + 1;
+
+        // exponent value
+        format_i(put + pos, abs(exponent), 2, 2);
+        pos = pos + 2;
+    }
+    put[pos] = '\0';
+}
+
+
 size_t fast_10pow(size_t const exponent)
 {
     static size_t pow10[10] = {
@@ -564,6 +764,7 @@ size_t integer_str_length(unsigned int value)
 
 void extract_integer_part(char* put, double value)
 {
+    // TODO: can be refactored, see format_i
     unsigned int intpart = abs(static_cast<int>(value));
     size_t const digits = integer_str_length(abs(intpart));
 
@@ -577,6 +778,32 @@ void extract_integer_part(char* put, double value)
     }
     put[digits] = '\0';
 }
+
+
+size_t frac_zeroes(double value)
+{   
+    if (value >= 1.0)
+    {
+        return 0;
+    }
+    double absvalue = value;
+    if (absvalue < 0)
+    {
+        absvalue = -value;
+    }
+    // general solution (using it for small numbers)
+    if (absvalue < 0.000001) return -floor(log10(absvalue)) + 1;
+    // ugly, but optimal
+    // similar: https://stackoverflow.com/a/3069580
+    if (absvalue < 0.000001)  return 6;
+    if (absvalue < 0.00001 )  return 5;
+    if (absvalue < 0.0001  )  return 4;
+    if (absvalue < 0.001   )  return 3;
+    if (absvalue < 0.01    )  return 2;
+    if (absvalue < 0.1     )  return 1;
+    return 0;
+}
+
 
 
 void extract_decimal_part(char* put, double value, size_t precision)
