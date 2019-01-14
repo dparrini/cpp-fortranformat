@@ -229,22 +229,23 @@ void write_i(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
     consume(scanner);
 
     int width = integer(scanner);
-    int atleast = 0;
+    int fill = 0;
     
     if (peek(scanner) == '.')
     {
         advance(scanner);
         consume(scanner);
-        atleast = integer(scanner);
+        fill = integer(scanner);
     }
 
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
         int value = va_arg(*ap, int); 
-        std::ios_base::fmtflags f(stream.flags());
-        stream << std::right << std::setw(width) << value;
-        stream.flags(f);  
+        char put[MAXLEN];
+
+        format_i(put, value, width, fill);
+        std::cout << put;
     }
 }
 

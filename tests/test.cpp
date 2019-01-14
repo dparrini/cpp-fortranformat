@@ -145,14 +145,17 @@ void test_integer()
     std::ostringstream ss;
 
     printfor(ss, "(I5)", 5000);
+    std::cout << ss.str() << std::endl;
     TEST_CHECK(compare_strings(ss.str().c_str(), " 5000"));
     ss.str(std::string());
 
     printfor(ss, "(I5)", 23);
+    std::cout << ss.str() << std::endl;
     TEST_CHECK(compare_strings(ss.str().c_str(), "   23"));
     ss.str(std::string());
 
     printfor(ss, "(I5.3)", 23);
+    std::cout << ss.str() << std::endl;
     TEST_CHECK(compare_strings(ss.str().c_str(), "  023"));
     ss.str(std::string());
 }

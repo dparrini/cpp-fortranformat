@@ -9,7 +9,7 @@ printfor("(I3, 2(1X, F4.2))", 10, 3.1416, 3.333);
 //  10 3.14 3.33
 ```
 
-In this version, only `Iw`, `Fw.d`, `Dw.d`, `Ew.d`, `Lw`, `A[w]`, `nX`, `/`, `nH`, and `''`
+In this version, only `Iw.m`, `Fw.d`, `Dw.d`, `Ew.d`, `Lw`, `A[w]`, `nX`, `/`, `nH`, and `''`
 [edit descriptors](http://www.fortran.com/fortran/F77_std/rjcnf0001-sh-13.html#sh-13.5.6) are supported. Both grouping `()` and repeat specification are supported also.
 Currently, the output goes directly to the output stream (stdout) or to a user specified output stream (with `ostream` base class). 
 
@@ -54,7 +54,7 @@ printfor(std::ostream& stream, char const* format, ...);
 
 ## Supported Features
 
-Some descriptors are fully supported (`Iw`), while others are partially. This means
+Some descriptors are fully supported (`Iw.m`), while others are partially. This means
 that the formatting in some cases may not reflect expected Fortran's. The following tables
 summarize the availability of each edit descriptor.
 
@@ -67,7 +67,7 @@ output is basic and don't reflect expected Fortran's. Such cases are of the `Gw.
 | Edit Descriptor | Available? |
 |:----------------|:----------:|
 | Iw              |    Yes     |
-| Iw.m            |    No      |
+| Iw.m            |    Yes     |
 | Fw.d            |    Yes     |
 | Ew.d            |    Yes     |
 | Ew.dEe          |    No      |
