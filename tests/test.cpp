@@ -15,6 +15,7 @@ void test_repeat();
 void test_alpha();
 void test_combined();
 void test_doubles();
+void test_nonrepeat();
 void test_format_float();
 
 
@@ -45,6 +46,7 @@ TEST_LIST = {
     { "repeat", test_repeat },
     { "combined", test_combined },
     { "doubles", test_doubles },
+    { "format_nonrepeat", test_nonrepeat },
     { "format_float", test_format_float },
     {0}
 };
@@ -249,6 +251,27 @@ void test_doubles()
     printfor("(F10.3)", -3.001345);
 
     TEST_CHECK(false);
+}
+
+void test_nonrepeat()
+{
+    std::cout << '\n';
+    std::ostringstream ss;
+
+    // unspecified X count and no arguments
+    printfor(ss, "('test', X, 'test')");
+    TEST_CHECK(compare_strings(ss.str().c_str(), "test test"));
+    ss.str(std::string());
+
+    // specified X count and no arguments
+    printfor(ss, "('test', 5X, 'test')");
+    TEST_CHECK(compare_strings(ss.str().c_str(), "test     test"));
+    ss.str(std::string());
+
+    // test / line feed
+    printfor(ss, "('test' / 'test')");
+    TEST_CHECK(compare_strings(ss.str().c_str(), "test\ntest"));
+    ss.str(std::string());
 }
 
 

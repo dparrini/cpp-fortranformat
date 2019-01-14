@@ -157,4 +157,14 @@ implicit none
     print *, "-------------"
     print "(F7.3, 1X, F5.3, 1X, F4.3)", 3.001345, 3.001345, 3.001345
     print *, "--"
+
+    print *, "('test', X, 'test')"
+    print *, "-------------"
+    print "('test', X, 'test')"
+    print *, "--"
+
+    print *, "(F7.3, 1X, / F5.3, 1X, F4.3), 3.001345, 3.001345, 3.001345"
+    print *, "-------------"
+    print "(F7.3, 1X, F5.3, 1X, F4.3)", 3.001345, 3.001345, 3.001345
+    print *, "--"
 end program hello

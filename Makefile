@@ -36,7 +36,7 @@ test: $(TEST_OBJS)
 	$(CXX) -o $(OUTDIR)/$@.exe $^ $(CXXFLAGS) -DDEBUG
 
 # fortran tests
-$(OBJDIR)/%.of: %.f90
+$(OBJDIR)/%.of: tests/%.f90
 	mkdir -p $(OBJDIR)
 	$(FC) -c -o $@ $< $(FFLAGS) $(FOPTIONS)
 
