@@ -66,6 +66,7 @@ void fill_with_char(char*, char const, size_t const);
 void format_i(char*, int, size_t, size_t);
 void format_f(char*, double, size_t, size_t);
 void format_d(char*, double, size_t, size_t, char expchar = 'D');
+void format_g(char*, double, size_t, size_t);
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int);
 size_t frac_zeroes(double);

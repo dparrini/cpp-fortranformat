@@ -65,6 +65,7 @@ void write_h(ostream&, Scanner*, size_t);
 void fill_with_char(char*, char const, size_t const);
 void format_i(char*, int, size_t, size_t);
 void format_f(char*, double, size_t, size_t);
+void format_g(char*, double, size_t, size_t);
 void format_d(char*, double, size_t, size_t, char expchar = 'D');
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int);
@@ -329,8 +330,26 @@ void write_e(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 
 void write_g(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 {
-    // partial support
-    write_f(stream, scanner, ap, repeat);
+    // TODO: similar to write_d and write_e
+    consume(scanner);
+
+    int width = integer(scanner);
+    int decimal = 0;
+
+    // dot character
+    advance(scanner); 
+    consume(scanner);
+    decimal = integer(scanner);
+    
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        double value = va_arg(*ap, double); 
+        char put[MAX_STR_LEN];
+
+        format_g(put, value, width, decimal);  
+        stream << put;
+    }
 }
 
 
@@ -722,6 +741,61 @@ void format_d(char* put, double value, size_t width, size_t precision, char expc
         pos = pos + 2;
     }
     put[pos] = '\0';
+}
+
+
+void format_g(char* put, double value, size_t width, size_t precision)
+{
+    double const MIN = 0.1;
+    double const MAX = fast_10pow(precision);
+    double absvalue = value;
+    if (absvalue < 0)
+    {
+        absvalue = - absvalue;
+    }
+
+    if (MIN > absvalue || absvalue >= MAX)
+    {
+        // format as Ew.dEe
+        format_d(put, value, width, precision, 'E');
+    }
+    else
+    {
+        if (width > 4)
+        {
+            // first, check range
+            size_t d;
+            for (d = 0; d <= precision; ++d)
+            {
+                double min;
+                if (d == 0) min = 0.1;
+                else        min = fast_10pow(d-1);
+                double max = fast_10pow(d);
+
+                if (min <= absvalue && absvalue < max)
+                {
+                    break;
+                }
+            }
+
+            // format as Fw.d (no exponential part)
+            size_t w = width - 4;
+            format_f(put, value, w, precision - d);  
+
+            // complete remaining blank spaces
+            for (size_t white = w; white < width; ++white)
+            {
+                put[white] = ' ';
+            }
+            put[width] = '\0';
+        }
+        else
+        {
+            fill_with_char(put, '*', width);
+            put[width] = '\0';
+        }
+        
+    }
 }
 
 

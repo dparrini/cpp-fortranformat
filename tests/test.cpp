@@ -14,9 +14,9 @@ void test_logical();
 void test_repeat();
 void test_alpha();
 void test_combined();
-void test_doubles();
 void test_nonrepeat();
 void test_format_float();
+void test_format_mixfloat();
 
 
 void trim_lb(char const* source, char* dest);
@@ -45,9 +45,9 @@ TEST_LIST = {
     { "alpha", test_alpha },
     { "repeat", test_repeat },
     { "combined", test_combined },
-    { "doubles", test_doubles },
     { "format_nonrepeat", test_nonrepeat },
     { "format_float", test_format_float },
+    { "format_mixfloat", test_format_mixfloat },
     {0}
 };
 
@@ -181,10 +181,12 @@ void test_float()
     // D and E
     printfor(ss, "(D9.3, 1X, D8.4, 1X, D13.4)", 1234.678, 1234.678 , 1234.678 );
     TEST_CHECK(compare_strings(ss.str().c_str(), "0.123D+04 ********    0.1235D+04"));
+    std::cout << ss.str() << std::endl;
     ss.str(std::string());
 
     printfor(ss, "( E10.3, E11.4, E13.6 )", 12345678.0, 23.5678, 0.345678 );
     TEST_CHECK(compare_strings(ss.str().c_str(), " 0.123E+08 0.2357E+02 0.345678E+00"));
+    std::cout << ss.str() << std::endl;
     ss.str(std::string());
 }
 
@@ -283,23 +285,6 @@ void test_combined()
 }
 
 
-void test_doubles()
-{
-    std::cout << '\n';
-    std::cout << "F ";
-    printfor("(F10.3)", 3.001345);
-    std::cout << "D ";
-    printfor("(D10.3)", 3.001345);
-    std::cout << "E ";
-    printfor("(E10.3)", 3.001345);
-    std::cout << "G ";
-    printfor("(G10.3)", 3.001345);
-
-    printfor("(F10.3)", -3.001345);
-
-    TEST_CHECK(false);
-}
-
 void test_nonrepeat()
 {
     std::cout << '\n';
@@ -334,10 +319,10 @@ void test_format_float()
     format_f(cs, 0.0, 1, 0);
     TEST_CHECK(compare_strings(cs, "*"));
     zerostr(cs);
-    std::cout << cs << std::endl;
 
     format_f(cs, 0.45, width, 3);
     TEST_CHECK(compare_strings(cs, "0.450"));
+    std::cout << cs << std::endl;
     zerostr(cs);
 
     format_f(cs, 11.3, width, 3);
@@ -363,10 +348,12 @@ void test_format_float()
 
     format_f(cs, -0.0, 2, 0);
     TEST_CHECK(compare_strings(cs, "**"));
+    std::cout << cs << std::endl;
     zerostr(cs);
 
     format_f(cs, -0.0, 3, 0);
     TEST_CHECK(compare_strings(cs, "-0."));
+    std::cout << cs << std::endl;
     zerostr(cs);
 
     format_f(cs, -0.45, width-1, 3);
@@ -395,6 +382,48 @@ void test_format_float()
 
     format_f(cs, -100000003.0004, 11, 0);
     TEST_CHECK(compare_strings(cs, "-100000003."));
+    zerostr(cs);
+}
+
+
+void test_format_mixfloat()
+{
+    // for c string functions
+    char cs[MAXLEN];
+    zerostr(cs);
+
+    // below 0.1 and without space
+    format_g(cs, 0.01, 4, 3);
+    TEST_CHECK(compare_strings(cs, "****"));
+    zerostr(cs);
+
+    // below 0.1 and without space
+    format_g(cs, 0.01, 8, 3);
+    TEST_CHECK(compare_strings(cs, ".100E-01"));
+    zerostr(cs);
+
+    // above 10**d
+    format_g(cs, 1500., 8, 3);
+    TEST_CHECK(compare_strings(cs, ".150E+04"));
+    zerostr(cs);
+
+    // several cases between 0.1 and 10**d
+    format_g(cs, 1500., 9, 4);
+    TEST_CHECK(compare_strings(cs, "1500.    "));
+    zerostr(cs);
+
+    // several cases between 0.1 and 10**d
+    format_g(cs, 1500., 10, 4);
+    TEST_CHECK(compare_strings(cs, " 1500.    "));
+    zerostr(cs);
+
+    // several cases between 0.1 and 10**d
+    format_g(cs, 1500., 11, 4);
+    TEST_CHECK(compare_strings(cs, "  1500.    "));
+    zerostr(cs);
+
+    format_g(cs, -1500., 11, 5);
+    TEST_CHECK(compare_strings(cs, "-1500.0    "));
     zerostr(cs);
 }
 
