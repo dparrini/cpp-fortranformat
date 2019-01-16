@@ -531,100 +531,90 @@ void format_i(char* put, int value, size_t width, size_t fill)
 
 void format_f(char* put, double value, size_t width, size_t precision)
 {
-    const char FILL_CHAR = '*';
-    const char DOT_CHAR = '.';
+    double absvalue = value;
+    if (value < 0)
+    {
+        absvalue = -value;
+    }
+    bool require_sign = value < 0;
 
     // integer part
     int intval = abs(static_cast<int>(value));
-    char intvalstr[MAX_STR_LEN];
-    extract_integer_part(intvalstr, intval);
-    size_t intlen = strlen(intvalstr);
-
-    // fractional part
-    char fractstr[MAX_STR_LEN];
-    extract_decimal_part(fractstr, value, precision);
-
-    // whether the sign is present
-    bool require_sign = value < 0; 
-    // TODO: this test doesn't handle -0.0
-    // stream << "Sign" << require_sign << '\n';
+    char intstr[MAX_STR_LEN];
+    extract_integer_part(intstr, intval);
+    size_t const INTLEN = strlen(intstr);
 
     // the integer part output is optional when its = 0
     bool optional_intvalue = 0 == intval;
 
-    // the required string width, given the integral part, the dot and the 
-    // precision
-    size_t strwidth = require_sign + intlen + 1 + precision;
+    // fractional part
+    char fracstr[MAX_STR_LEN];
+    extract_decimal_part(fracstr, value, precision);
+    size_t const FRACLEN = precision;
 
-    if (strwidth > width and strwidth - width == 1 and optional_intvalue and width != 1)
+    // 0. precision D+00
+    size_t const FORMATCHARS = 1;
+    size_t const INTCHARS = (!optional_intvalue) * INTLEN;
+    size_t maxlen = require_sign + INTCHARS + FORMATCHARS + FRACLEN;
+
+
+    if (width < 2 || maxlen > width)
     {
-        // omit integral part and then write the number
-        size_t pos = 0;
-        if (require_sign)
-        {
-            put[pos] = '-';
-            pos = pos + 1;
-        }
-        put[pos] = DOT_CHAR;
-        pos = pos + 1;
-
-        size_t const fraclen = strlen(fractstr);
-        size_t const maxchars = width - 1; // max. chars that can be written
-        size_t total = maxchars;
-
-        if (fraclen < maxchars)
-        {
-            total = fraclen;
-        }
-
-        for (; pos < total + 1 + require_sign; ++pos)
-        {
-            put[pos] = fractstr[pos - 1 -require_sign];
-        }
-        put[total + 1 + require_sign] = '\0';
-    }
-    else if (strwidth <= width)
-    {
-        // write the number
-        size_t pos = 0;
-        if (require_sign)
-        {
-            put[pos] = '-';
-            pos = pos + 1;
-        }
-        // integral part
-        
-        for (; pos < intlen + require_sign; ++pos)
-        {
-            put[pos] = intvalstr[pos - require_sign];
-        }
-        put[intlen + require_sign] = DOT_CHAR;
-        // fractional part
-        pos = intlen + 1 + require_sign;
-        size_t const fraclen = strlen(fractstr);
-        size_t const maxchars = width - intlen - 1 - require_sign; // max. chars that can be written
-        size_t total = maxchars;
-
-        if (fraclen < maxchars)
-        {
-            total = fraclen;
-        }
-
-        for (; pos < total + intlen + 1 + require_sign; ++pos)
-        {
-            put[pos] = fractstr[pos - intlen - 1 - require_sign];
-        }
-        put[total + intlen + 1 + require_sign] = '\0';
+        fill_with_char(put, '*', width);
     }
     else
     {
-        // fill with FILL_CHAR
-        for (size_t count = 0; count < strwidth; ++count)
+        // actual length, possibly including a leading zero for x < 1.0
+        size_t len = maxlen;
+        bool include_leading_zero = width > len && optional_intvalue;
+        if (include_leading_zero)
         {
-            put[count] = FILL_CHAR;
+            // include optional 0 in the maxlen, if its not accounted for initially
+            len = len + 1;
         }
-        put[width] = '\0';
+        size_t pos = 0;
+
+        // right-alignment whitespace
+        if (width > len)
+        {
+            for (;pos < width - len; ++pos)
+            {
+                put[pos] = ' ';
+            } 
+        }
+
+        // minus sign
+        if (require_sign)
+        {
+            put[pos] = '-';
+            pos = pos + 1;
+        } 
+
+        // leading zero
+        if (include_leading_zero)
+        {
+            put[pos] = '0';
+            pos = pos + 1;
+        }
+        else if (intval != 0)
+        {
+            // integer part value
+            for(size_t n = 0; n < INTLEN; ++n, ++pos)
+            {
+                put[pos] = intstr[n];
+            }
+        }
+        put[pos] = '.';
+        pos = pos + 1;
+
+        // fractional part value
+        for(size_t n = 0; n < FRACLEN; ++n, ++pos)
+        {
+            put[pos] = fracstr[n];
+        }   
     }
+    put[width] = '\0';
+
 }
 
 
@@ -637,12 +627,17 @@ void format_d(char* put, double value, size_t width, size_t precision, char expc
     }
     bool require_sign = value < 0;
 
-    // 0. precision D+00
-    size_t const FORMATCHARS = 6;
-    size_t maxlen = require_sign + FORMATCHARS + precision;
+    // minimum length without leading zero
+    // . precision D+00
+    size_t const FORMATCHARS = 5;
+    size_t const MINLEN = require_sign + FORMATCHARS + precision;
+
+    // check whether there's space for a leading zero
+    bool include_leading_zero = width > MINLEN;
+    size_t const LEN = MINLEN + include_leading_zero;
 
     size_t pos = 0;
-    if (maxlen > width)
+    if (LEN > width)
     {
         fill_with_char(put, '*', width);
         pos = pos + width;
@@ -681,9 +676,9 @@ void format_d(char* put, double value, size_t width, size_t precision, char expc
         unsigned int intval = static_cast<unsigned int>(finalnumber);
 
         // right-alignment whitespace
-        if (width > maxlen)
+        if (width > LEN)
         {
-            for (;pos < width - maxlen; ++pos)
+            for (;pos < width - LEN; ++pos)
             {
                 put[pos] = ' ';
             } 
@@ -696,10 +691,14 @@ void format_d(char* put, double value, size_t width, size_t precision, char expc
             pos = pos + 1;
         }
 
-        // leading zero and dot
-        put[pos]     = '0';
-        put[pos + 1] = '.';
-        pos = pos + 2;
+        // leading zero
+        if (include_leading_zero)
+        {
+            put[pos] = '0';
+            pos = pos + 1;
+        }
+        put[pos] = '.';
+        pos = pos + 1;
 
         // number value
         format_i(put + pos, intval, precision, 0);
