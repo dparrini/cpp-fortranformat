@@ -62,6 +62,7 @@ void write_str(ostream&, Scanner*);
 void write_nl(ostream&, Scanner*);
 void write_h(ostream&, Scanner*, size_t);
 
+void fill_with_char(char*, char const, size_t const);
 void format_i(char*, int, size_t, size_t);
 void format_f(char*, double, size_t, size_t);
 void format_d(char*, double, size_t, size_t, char expchar = 'D');
@@ -463,6 +464,14 @@ void write_h(ostream& stream, Scanner* scanner, size_t length)
 // Number formatting
 //
 
+void fill_with_char(char* put, char const fill, size_t const width)
+{
+    for (size_t n = 0; n < width; ++n)
+    {
+        put[n] = fill;
+    }
+}
+
 void format_i(char* put, int value, size_t width, size_t fill)
 {
     unsigned int absvalue = abs(value);
@@ -477,11 +486,8 @@ void format_i(char* put, int value, size_t width, size_t fill)
     size_t pos = 0;
     if (maxlen > width)
     {
-        // TODO: can be refactored
-        for (; pos < width; ++pos)
-        {
-            put[pos] = '*';
-        }
+        fill_with_char(put, '*', width);
+        pos = pos + width;
     }
     else
     {
@@ -638,11 +644,8 @@ void format_d(char* put, double value, size_t width, size_t precision, char expc
     size_t pos = 0;
     if (maxlen > width)
     {
-        // TODO: can be refactored
-        for (; pos < width; ++pos)
-        {
-            put[pos] = '*';
-        }
+        fill_with_char(put, '*', width);
+        pos = pos + width;
     }
     else
     {

@@ -62,6 +62,7 @@ void write_x(ostream&, Scanner*, size_t repeat = 1);
 void write_str(ostream&, Scanner*);
 void write_h(ostream&, Scanner*, size_t);
 
+void fill_with_char(char*, char const, size_t const);
 void format_i(char*, int, size_t, size_t);
 void format_f(char*, double, size_t, size_t);
 void format_d(char*, double, size_t, size_t, char expchar = 'D');
