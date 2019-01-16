@@ -544,7 +544,7 @@ void format_i(char* put, int value, size_t width, size_t fill)
             intpart = intpart - newvalue * power;
         }
     }
-    put[pos] = '\0'; 
+    put[width] = '\0'; 
 }
 
 

@@ -141,23 +141,29 @@ void test_basic()
 
 void test_integer()
 {
-    std::cout << '\n';
-    std::ostringstream ss;
+    // for c string functions
+    char cs[MAXLEN];
+    zerostr(cs);
 
-    printfor(ss, "(I5)", 5000);
-    std::cout << ss.str() << std::endl;
-    TEST_CHECK(compare_strings(ss.str().c_str(), " 5000"));
-    ss.str(std::string());
+    format_i(cs, 5000, 3, 0);
+    TEST_CHECK(compare_strings(cs, "***"));
+    zerostr(cs);
 
-    printfor(ss, "(I5)", 23);
-    std::cout << ss.str() << std::endl;
-    TEST_CHECK(compare_strings(ss.str().c_str(), "   23"));
-    ss.str(std::string());
+    format_i(cs, 5000, 5, 0);
+    TEST_CHECK(compare_strings(cs, " 5000"));
+    zerostr(cs);
 
-    printfor(ss, "(I5.3)", 23);
-    std::cout << ss.str() << std::endl;
-    TEST_CHECK(compare_strings(ss.str().c_str(), "  023"));
-    ss.str(std::string());
+    format_i(cs, 23, 5, 0);
+    TEST_CHECK(compare_strings(cs, "   23"));
+    zerostr(cs);
+
+    format_i(cs, 23, 5, 3);
+    TEST_CHECK(compare_strings(cs, "  023"));
+    zerostr(cs);
+
+    format_i(cs, -23, 5, 3);
+    TEST_CHECK(compare_strings(cs, " -023"));
+    zerostr(cs);
 }
 
 
