@@ -30,7 +30,7 @@
 #include "fortranformat.hpp"
 using std::ostream;
 
-size_t const MAXLEN = 200;
+size_t const MAX_STR_LEN = 200;
 
 #ifndef DEBUG
 
@@ -242,7 +242,7 @@ void write_i(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
         int value = va_arg(*ap, int); 
-        char put[MAXLEN];
+        char put[MAX_STR_LEN];
 
         format_i(put, value, width, fill);
         std::cout << put;
@@ -266,7 +266,7 @@ void write_f(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
         double value = va_arg(*ap, double); 
-        char put[MAXLEN];
+        char put[MAX_STR_LEN];
 
         format_f(put, value, width, decimal);  
         std::ios_base::fmtflags f(stream.flags());
@@ -293,7 +293,7 @@ void write_d(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
         double value = va_arg(*ap, double); 
-        char put[MAXLEN];
+        char put[MAX_STR_LEN];
 
         format_d(put, value, width, decimal, 'D');  
         stream << put;
@@ -318,7 +318,7 @@ void write_e(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
         double value = va_arg(*ap, double); 
-        char put[MAXLEN];
+        char put[MAX_STR_LEN];
 
         format_d(put, value, width, decimal, 'E');  
         stream << put;
@@ -375,7 +375,7 @@ void write_a(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
         std::ios_base::fmtflags f(stream.flags());
         if (width > 0)
         {
-            char valsub[MAXLEN];
+            char valsub[MAX_STR_LEN];
             strncpy(valsub, value, width);
             valsub[width] = '\0';
 
@@ -420,8 +420,8 @@ void write_str(ostream& stream, Scanner* scanner)
         }
     }
     // extract string before last '
-    char valstr[MAXLEN];
-    extract(scanner, valstr, MAXLEN);
+    char valstr[MAX_STR_LEN];
+    extract(scanner, valstr, MAX_STR_LEN);
 
     advance(scanner);
     consume(scanner); // consume last '
@@ -447,8 +447,8 @@ void write_h(ostream& stream, Scanner* scanner, size_t length)
         advance(scanner);
     }
     // extract string before last '
-    char valstr[MAXLEN];
-    extract(scanner, valstr, MAXLEN);
+    char valstr[MAX_STR_LEN];
+    extract(scanner, valstr, MAX_STR_LEN);
 
     // consume last '
     advance(scanner);
@@ -530,12 +530,12 @@ void format_f(char* put, double value, size_t width, size_t precision)
 
     // integer part
     int intval = abs(static_cast<int>(value));
-    char intvalstr[MAXLEN];
+    char intvalstr[MAX_STR_LEN];
     extract_integer_part(intvalstr, intval);
     size_t intlen = strlen(intvalstr);
 
     // fractional part
-    char fractstr[MAXLEN];
+    char fractstr[MAX_STR_LEN];
     extract_decimal_part(fractstr, value, precision);
 
     // whether the sign is present
@@ -928,8 +928,8 @@ int integer(Scanner* scanner)
         advance(scanner);
     }
 
-    char valstr[MAXLEN];
-    extract(scanner, valstr, MAXLEN);
+    char valstr[MAX_STR_LEN];
+    extract(scanner, valstr, MAX_STR_LEN);
     scanner->start = scanner->current;
 
     val = atoi(valstr);
