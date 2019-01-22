@@ -550,11 +550,6 @@ void format_i(char* put, int value, size_t width, size_t fill)
 
 void format_f(char* put, double value, size_t width, size_t precision)
 {
-    double absvalue = value;
-    if (value < 0)
-    {
-        absvalue = -value;
-    }
     bool require_sign = value < 0;
 
     // integer part
@@ -639,11 +634,7 @@ void format_f(char* put, double value, size_t width, size_t precision)
 
 void format_d(char* put, double value, size_t width, size_t precision, char expchar)
 {
-    double absvalue = value;
-    if (value < 0)
-    {
-        absvalue = -value;
-    }
+    double absvalue = fabs(value);
     bool require_sign = value < 0;
 
     // minimum length without leading zero
@@ -748,11 +739,7 @@ void format_g(char* put, double value, size_t width, size_t precision)
 {
     double const MIN = 0.1;
     double const MAX = fast_10pow(precision);
-    double absvalue = value;
-    if (absvalue < 0)
-    {
-        absvalue = - absvalue;
-    }
+    double absvalue = fabs(value);
 
     if (MIN > absvalue || absvalue >= MAX)
     {
@@ -863,11 +850,7 @@ size_t frac_zeroes(double value)
     {
         return 0;
     }
-    double absvalue = value;
-    if (absvalue < 0)
-    {
-        absvalue = -value;
-    }
+    double absvalue = fabs(value);
     // general solution (using it for small numbers)
     if (absvalue < 0.000001) return -floor(log10(absvalue)) + 1;
     // ugly, but optimal
@@ -882,14 +865,9 @@ size_t frac_zeroes(double value)
 }
 
 
-
 void extract_decimal_part(char* put, double value, size_t precision)
 {
-    double absvalue = value;
-    if (absvalue < 0)
-    {
-        absvalue = -absvalue;
-    }
+    double absvalue = fabs(value);
     int intpart = static_cast<int>(absvalue);
     double decpart = absvalue - intpart;
 
@@ -903,6 +881,16 @@ void extract_decimal_part(char* put, double value, size_t precision)
         put[pw-1] = intpart + '0';
     }
     put[precision] = '\0';
+}
+
+
+inline double fabs(double const value)
+{
+    if (value < 0.0)
+    {
+        return -value;
+    }
+    return value;
 }
 
 
