@@ -49,32 +49,33 @@ void stream_printfor(ostream&, char const*, va_list*);
 
 
 void write_group(ostream&, Scanner*, va_list*);
-void write_i(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_f(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_d(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_e(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_g(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_l(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_a(ostream&, Scanner*, va_list*, size_t repeat = 1);
+void write_i(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_f(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_d(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_e(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_g(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_l(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_a(ostream&, Scanner*, va_list*, size_t const repeat = 1);
 
-void write_x(ostream&, Scanner*, size_t repeat = 1);
+void write_x(ostream&, Scanner*, size_t const repeat = 1);
 void write_str(ostream&, Scanner*);
 void write_nl(ostream&, Scanner*);
-void write_h(ostream&, Scanner*, size_t);
+void write_h(ostream&, Scanner*, size_t const);
 
 void fill_with_char(char*, char const, size_t const);
-void format_i(char*, int, size_t, size_t);
-void format_f(char*, double, size_t, size_t);
-void format_g(char*, double, size_t, size_t);
-void format_d(char*, double, size_t, size_t, char expchar = 'D');
+void format_i(char*, int const, size_t const, size_t const);
+void format_f(char*, double const, size_t const, size_t const);
+void format_g(char*, double const, size_t const, size_t const);
+void format_d(char*, double const, size_t const, size_t const, 
+        char const expchar = 'D');
 size_t fast_10pow(size_t const);
-size_t integer_str_length(unsigned int);
-size_t frac_zeroes(double);
-void extract_integer_part(char*, double);
-void extract_decimal_part(char*, double, size_t);
+size_t integer_str_length(unsigned int const);
+size_t frac_zeroes(double const );
+void extract_integer_part(char*, double const);
+void extract_decimal_part(char*, double const, size_t const);
 
 void consume(Scanner*);
-void extract(Scanner*, char*, size_t);
+void extract(Scanner*, char*, size_t const);
 inline char advance(Scanner*);
 bool match(Scanner*, char);
 inline char peek(Scanner*);
@@ -226,7 +227,8 @@ void write_group(ostream& stream, Scanner* scanner, va_list* ap)
 // Format write edit descriptors
 //
 
-void write_i(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
+void write_i(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat)
 {
     consume(scanner);
 
@@ -252,7 +254,8 @@ void write_i(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 }
 
 
-void write_f(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
+void write_f(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat)
 {
     consume(scanner);
 
@@ -278,7 +281,8 @@ void write_f(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 }
 
 
-void write_d(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
+void write_d(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat)
 {
     // TODO: similar to write_e
     consume(scanner);
@@ -303,7 +307,8 @@ void write_d(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 }
 
 
-void write_e(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
+void write_e(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat)
 {
     // TODO: similar to write_d
     consume(scanner);
@@ -328,7 +333,8 @@ void write_e(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 }
 
 
-void write_g(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
+void write_g(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat)
 {
     // TODO: similar to write_d and write_e
     consume(scanner);
@@ -353,7 +359,8 @@ void write_g(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 }
 
 
-void write_l(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
+void write_l(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat)
 {
     consume(scanner);
     int width = integer(scanner);
@@ -378,7 +385,8 @@ void write_l(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 }
 
 
-void write_a(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
+void write_a(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat)
 {
     consume(scanner);
     int width = 0;
@@ -411,7 +419,8 @@ void write_a(ostream& stream, Scanner* scanner, va_list* ap, size_t repeat)
 }
 
 
-void write_x(ostream& stream, Scanner* scanner, size_t repeat)
+void write_x(ostream& stream, Scanner* scanner, 
+    size_t const repeat)
 {
     consume(scanner); // consume X
 
@@ -458,7 +467,8 @@ void write_nl(ostream& stream, Scanner* scanner)
 }
 
 
-void write_h(ostream& stream, Scanner* scanner, size_t length)
+void write_h(ostream& stream, Scanner* scanner, 
+    size_t const length)
 {
     consume(scanner); // consume opening '
     for (size_t count = 0; count < length; ++count)
@@ -491,7 +501,7 @@ void fill_with_char(char* put, char const fill, size_t const width)
     }
 }
 
-void format_i(char* put, int value, size_t width, size_t fill)
+void format_i(char* put, int const value, size_t const width, size_t const fill)
 {
     unsigned int absvalue = abs(value);
 
@@ -548,7 +558,8 @@ void format_i(char* put, int value, size_t width, size_t fill)
 }
 
 
-void format_f(char* put, double value, size_t width, size_t precision)
+void format_f(char* put, double const value, size_t const width, 
+    size_t const precision)
 {
     bool require_sign = value < 0;
 
@@ -632,7 +643,8 @@ void format_f(char* put, double value, size_t width, size_t precision)
 }
 
 
-void format_d(char* put, double value, size_t width, size_t precision, char expchar)
+void format_d(char* put, double const value, size_t const width, 
+    size_t const precision, char const expchar)
 {
     double absvalue = fabs(value);
     bool require_sign = value < 0;
@@ -735,7 +747,8 @@ void format_d(char* put, double value, size_t width, size_t precision, char expc
 }
 
 
-void format_g(char* put, double value, size_t width, size_t precision)
+void format_g(char* put, double const value, size_t const width, 
+    size_t const precision)
 {
     double const MIN = 0.1;
     double const MAX = fast_10pow(precision);
@@ -811,7 +824,7 @@ size_t fast_10pow(size_t const exponent)
 }
 
 
-size_t integer_str_length(unsigned int value)
+size_t integer_str_length(unsigned int const value)
 {
     // general solution (using it for big numbers)
     if (value >= 10000000) return floor(log10(value)) + 1;
@@ -826,7 +839,7 @@ size_t integer_str_length(unsigned int value)
 }
 
 
-void extract_integer_part(char* put, double value)
+void extract_integer_part(char* put, double const value)
 {
     // TODO: can be refactored, see format_i
     unsigned int intpart = abs(static_cast<int>(value));
@@ -844,7 +857,7 @@ void extract_integer_part(char* put, double value)
 }
 
 
-size_t frac_zeroes(double value)
+size_t frac_zeroes(double const value)
 {   
     if (value >= 1.0)
     {
@@ -865,7 +878,7 @@ size_t frac_zeroes(double value)
 }
 
 
-void extract_decimal_part(char* put, double value, size_t precision)
+void extract_decimal_part(char* put, double const value, size_t const precision)
 {
     double absvalue = fabs(value);
     int intpart = static_cast<int>(absvalue);
@@ -904,7 +917,7 @@ void consume(Scanner* scanner)
 }
 
 
-void extract(Scanner* scanner, char* put, size_t length)
+void extract(Scanner* scanner, char* put, size_t const length)
 {
     size_t len = (scanner->current - scanner->start) + 1;
     if (len > length)
