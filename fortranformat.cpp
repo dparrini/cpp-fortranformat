@@ -249,7 +249,7 @@ void write_i(ostream& stream, Scanner* scanner, va_list* ap,
         char put[MAX_STR_LEN];
 
         format_i(put, value, width, fill);
-        std::cout << put;
+        stream << put;
     }
 }
 
