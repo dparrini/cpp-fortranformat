@@ -116,7 +116,7 @@ void stream_printfor(ostream& stream, char const* const formatstr, va_list* ap)
     {
         write_group(stream, &scanner, ap);
     }
-    stream << '\n';    
+    stream << '\n';
 }
 
 

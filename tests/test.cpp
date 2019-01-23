@@ -1,6 +1,7 @@
 #include <cstring>
 #include <cctype>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <string>
 #include "fortranformat_tests.hpp"
@@ -20,6 +21,7 @@ void test_format_mixfloat();
 
 
 void trim_lb(char const* source, char* dest);
+std::string trim_lb(std::string source);
 void zerostr(char* str);
 
 size_t const MAXLEN = 200;
@@ -34,6 +36,102 @@ bool compare_strings(char const* str1, char const* str2)
     trim_lb(str2, nstr2);
 
     return strcmp(nstr1, nstr2) == 0;
+}
+
+
+bool compare_strings(std::string str1, std::string str2)
+{
+    std::string nstr1 = trim_lb(str1);
+    std::string nstr2 = trim_lb(str2);
+    return nstr1 == nstr2;
+}
+
+
+void compare_strings_print(char const* str1, char const* str2)
+{
+    size_t min_len;
+    if (strlen(str1) > strlen(str2))
+    {
+        min_len = strlen(str2);
+    }
+    else
+    {
+        min_len = strlen(str1);
+    }
+
+    for (size_t n = 0; n < MAXLEN; ++n)
+    {
+        std::cout << std::setw(3) << std::right << n + 1 << ". ";
+        std::string char1, char2;
+
+        
+        if (n < min_len)
+        {
+            char1 = str1[n];
+            char2 = str2[n];
+        }
+        else if (n > min_len && min_len == strlen(str1))
+        {
+            char1 = "";
+            char2 = str2[n];
+        }
+        else if (n > min_len && min_len == strlen(str2))
+        {
+            char1 = str1[n];
+            char2 = "";
+        }
+
+        if ("\n" == char1) char1 = "\\n";
+        if ("\n" == char2) char2 = "\\n";
+        if ("\0" == char1) char1 = "\\0";
+        if ("\0" == char2) char2 = "\\0";
+
+        std::cout << std::right << std::setw(2) << str1[n];
+        std::cout << " " << std::right << std::setw(2) << str2[n] << '\n'; 
+    }
+}
+
+
+void compare_strings_print(std::string str1, std::string str2)
+{
+    size_t min_len;
+    if (str1.size() > str2.size())
+    {
+        min_len = str2.size();
+    }
+    else
+    {
+        min_len = str1.size();
+    }
+
+    for (size_t n = 0; n < MAXLEN; ++n)
+    {
+        std::cout << std::setw(3) << std::right << n + 1 << ". ";
+        std::string char1, char2;
+
+        
+        if (n < min_len)
+        {
+            char1 = str1[n];
+            char2 = str2[n];
+        }
+        else if (n > min_len && min_len == str1.size())
+        {
+            char1 = "";
+            char2 = str2[n];
+        }
+        else if (n > min_len && min_len == str2.size())
+        {
+            char1 = str1[n];
+            char2 = "";
+        }
+
+        if (char1.size() > 0 && (std::isspace(char1[0]) || std::iscntrl(char1[0]))) char1 = "--";
+        if (char2.size() > 0 && (std::isspace(char2[0]) || std::iscntrl(char2[0]))) char2 = "--";
+
+        std::cout << std::right << std::setw(2) << str1[n];
+        std::cout << " " << std::right << std::setw(2) << str2[n] << '\n'; 
+    }
 }
 
 
@@ -61,30 +159,32 @@ void test_basic()
     char cs[MAXLEN];
     zerostr(cs);
 
+    std::cout << "  |Number printing:" << '\n';
+
     format_i(cs, 10, 3, 3); // 010
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
 
     format_i(cs, -10, 3, 3); // ***
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
 
     format_i(cs, -1, 4, 3); // -001
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
 
     format_i(cs, -1, 7, 3); // ___-001
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
 
     format_d(cs, 1234.678, 9, 3); // 0.123D+04
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
 
     format_d(cs, 1234.678, 8, 4); // ********
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
     format_d(cs, 1234.678, 13, 4); // ___0.1235D+04
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
     format_d(cs, -1234.678, 13, 4); // __-0.1235D+04
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
 
     format_d(cs, -1234.678, 13, 5); // __-0.1235D+04
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
 
 
     // fractional part extraction
@@ -187,12 +287,12 @@ void test_float()
     // D and E
     printfor(ss, "(D9.3, 1X, D8.4, 1X, D13.4)", 1234.678, 1234.678 , 1234.678 );
     TEST_CHECK(compare_strings(ss.str().c_str(), "0.123D+04 ********    0.1235D+04"));
-    std::cout << ss.str() << std::endl;
+    std::cout << "  |" << ss.str() << '\n';
     ss.str(std::string());
 
     printfor(ss, "( E10.3, E11.4, E13.6 )", 12345678.0, 23.5678, 0.345678 );
     TEST_CHECK(compare_strings(ss.str().c_str(), " 0.123E+08 0.2357E+02 0.345678E+00"));
-    std::cout << ss.str() << std::endl;
+    std::cout << "  |" << ss.str() << '\n';
     ss.str(std::string());
 }
 
@@ -218,7 +318,7 @@ void test_repeat()
     std::ostringstream ss;
 
     printfor(ss, "(3I3)", 1, 2, 3);
-    TEST_CHECK(compare_strings(ss.str().c_str(), "  1  2  3"));
+    TEST_CHECK(compare_strings(ss.str(), "  1  2  3"));
     ss.str(std::string());
 
     printfor(ss, "(3A10)", "test1", "test2", "test3");
@@ -231,6 +331,7 @@ void test_repeat()
 
     ss.str(std::string());
 }
+
 
 void test_alpha()
 {
@@ -322,13 +423,15 @@ void test_format_float()
     // write
     size_t width = 5;
 
+    std::cout << '\n' << "  |Number printing:" << '\n';
+
     format_f(cs, 0.0, 1, 0);
     TEST_CHECK(compare_strings(cs, "*"));
     zerostr(cs);
 
     format_f(cs, 0.45, width, 3);
     TEST_CHECK(compare_strings(cs, "0.450"));
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
     zerostr(cs);
 
     format_f(cs, 11.3, width, 3);
@@ -354,12 +457,12 @@ void test_format_float()
 
     format_f(cs, -0.0, 2, 0);
     TEST_CHECK(compare_strings(cs, "**"));
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
     zerostr(cs);
 
     format_f(cs, -0.0, 3, 0);
     TEST_CHECK(compare_strings(cs, "-0."));
-    std::cout << cs << std::endl;
+    std::cout << "  |" << cs << '\n';
     zerostr(cs);
 
     format_f(cs, -0.45, width-1, 3);
@@ -464,6 +567,40 @@ void trim_lb(char const* source, char* dest)
         pos_src = pos_src + 1;
     }
     dest[pos_dest] = '\0';
+}
+
+
+std::string trim_lb(std::string source)
+{
+    size_t len = source.size();
+    size_t pos_src = 0;
+
+    // look for the end index
+    size_t last = len - 1;
+    char c = source[last];
+
+    while ((std::isspace(c) || std::iscntrl(c)) && last > 0)
+    {
+        last = last - 1;
+        c = source[last];
+    }
+
+    std::string dest;
+    while (pos_src <= last)
+    {
+        if (source[pos_src] != '\n' || source[pos_src] != '\r' )
+        {
+            dest = dest + source[pos_src];
+        }
+        else
+        {
+            break;
+        }
+        pos_src = pos_src + 1;
+    }
+    // dest[pos_dest] = '\0';
+
+    return dest;
 }
 
 
