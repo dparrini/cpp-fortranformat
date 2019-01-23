@@ -38,7 +38,7 @@ struct Scanner {
     const char* start;
     const char* current;
 
-    Scanner(const char* source)
+    Scanner(const char* const source)
     {
         this->start   = source;
         this->current = source;
@@ -46,43 +46,45 @@ struct Scanner {
 };
 
 
-void stream_printfor(ostream&, char const*, va_list*);
+void stream_printfor(ostream&, char const* const, va_list*);
 
 
 void write_group(ostream&, Scanner*, va_list*);
-void write_i(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_f(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_d(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_e(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_g(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_l(ostream&, Scanner*, va_list*, size_t repeat = 1);
-void write_a(ostream&, Scanner*, va_list*, size_t repeat = 1);
+void write_i(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_f(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_d(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_e(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_g(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_l(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_a(ostream&, Scanner*, va_list*, size_t const repeat = 1);
 
-void write_x(ostream&, Scanner*, size_t repeat = 1);
+void write_x(ostream&, Scanner*, size_t const repeat = 1);
 void write_str(ostream&, Scanner*);
-void write_h(ostream&, Scanner*, size_t);
+void write_nl(ostream&, Scanner*);
+void write_h(ostream&, Scanner*, size_t const);
 
 void fill_with_char(char*, char const, size_t const);
-void format_i(char*, int, size_t, size_t);
-void format_f(char*, double, size_t, size_t);
-void format_d(char*, double, size_t, size_t, char expchar = 'D');
-void format_g(char*, double, size_t, size_t);
+void format_i(char*, int const, size_t const, size_t const);
+void format_f(char*, double const, size_t const, size_t const);
+void format_g(char*, double const, size_t const, size_t const);
+void format_d(char*, double const, size_t const, size_t const, 
+        char const expchar = 'D');
 size_t fast_10pow(size_t const);
-size_t integer_str_length(unsigned int);
-size_t frac_zeroes(double);
-void extract_integer_part(char*, double);
-void extract_decimal_part(char*, double, size_t);
+size_t integer_str_length(unsigned int const);
+size_t frac_zeroes(double const);
+void extract_integer_part(char*, double const);
+void extract_decimal_part(char*, double const, size_t const);
 
-void consume(Scanner*);
-void extract(Scanner*, char*, size_t);
-inline char advance(Scanner*);
-bool match(Scanner*, char);
-inline char peek(Scanner*);
-inline char peekNext(Scanner*);
-bool isAtEnd(Scanner*);
-inline bool isDigit(char);
-inline bool isAlpha(char);
-int integer(Scanner*);
-void skipWhitespace(Scanner*);
+void consume(Scanner* const);
+void extract(Scanner* const, char*, size_t const);
+inline char advance(Scanner* const);
+bool match(Scanner*, char const);
+inline char peek(Scanner const* const);
+inline char peek_next(Scanner const* const);
+bool is_at_end(Scanner const* const);
+inline bool is_digit(char const);
+inline bool is_alpha(char const);
+int integer(Scanner* const);
+void skip_whitespace(Scanner* const);
 
 #endif

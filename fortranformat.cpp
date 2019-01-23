@@ -38,14 +38,14 @@ struct Scanner {
     const char* start;
     const char* current;
 
-    Scanner(const char* source)
+    Scanner(const char* const source)
     {
         this->start   = source;
         this->current = source;
     }
 };
 
-void stream_printfor(ostream&, char const*, va_list*);
+void stream_printfor(ostream&, char const* const, va_list*);
 
 
 void write_group(ostream&, Scanner*, va_list*);
@@ -70,21 +70,21 @@ void format_d(char*, double const, size_t const, size_t const,
         char const expchar = 'D');
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
-size_t frac_zeroes(double const );
+size_t frac_zeroes(double const);
 void extract_integer_part(char*, double const);
 void extract_decimal_part(char*, double const, size_t const);
 
-void consume(Scanner*);
-void extract(Scanner*, char*, size_t const);
-inline char advance(Scanner*);
-bool match(Scanner*, char);
-inline char peek(Scanner*);
-inline char peekNext(Scanner*);
-bool isAtEnd(Scanner*);
-inline bool isDigit(char);
-inline bool isAlpha(char);
-int integer(Scanner*);
-void skipWhitespace(Scanner*);
+void consume(Scanner* const);
+void extract(Scanner* const, char*, size_t const);
+inline char advance(Scanner* const);
+bool match(Scanner*, char const);
+inline char peek(Scanner const* const);
+inline char peek_next(Scanner const* const);
+bool is_at_end(Scanner const* const);
+inline bool is_digit(char const);
+inline bool is_alpha(char const);
+int integer(Scanner* const);
+void skip_whitespace(Scanner* const);
 
 #endif
 
@@ -107,10 +107,10 @@ void printfor(ostream& stream, char const* formatstr, ...)
 }
 
 
-void stream_printfor(ostream& stream, char const* formatstr, va_list* ap)
+void stream_printfor(ostream& stream, char const* const formatstr, va_list* ap)
 {
     Scanner scanner(formatstr);
-    skipWhitespace(&scanner);
+    skip_whitespace(&scanner);
     char c = advance(&scanner);
     if ('(' == c)
     {
@@ -123,7 +123,7 @@ void stream_printfor(ostream& stream, char const* formatstr, va_list* ap)
 void write_group(ostream& stream, Scanner* scanner, va_list* ap)
 {
     // consume open paren and following whitespace
-    skipWhitespace(scanner);
+    skip_whitespace(scanner);
     consume(scanner);
 
     for (;;)
@@ -134,7 +134,7 @@ void write_group(ostream& stream, Scanner* scanner, va_list* ap)
 
         // repeat count
         unsigned int repeat = 1;
-        if (isDigit(c))
+        if (is_digit(c))
         {
             repeat = integer(scanner);
             // TODO: repeat must be nonzero
@@ -153,7 +153,7 @@ void write_group(ostream& stream, Scanner* scanner, va_list* ap)
             }
         }
         // edit descriptors
-        else if (isAlpha(c))
+        else if (is_alpha(c))
         {
             switch(c)
             {
@@ -212,12 +212,12 @@ void write_group(ostream& stream, Scanner* scanner, va_list* ap)
             consume(scanner);
         }
 
-        if (isAtEnd(scanner))
+        if (is_at_end(scanner))
         {
             break;
         }
 
-        skipWhitespace(scanner);
+        skip_whitespace(scanner);
         consume(scanner);
     }
 }
@@ -390,7 +390,7 @@ void write_a(ostream& stream, Scanner* scanner, va_list* ap,
 {
     consume(scanner);
     int width = 0;
-    if (isDigit(peek(scanner)))
+    if (is_digit(peek(scanner)))
     {
         width = integer(scanner);
     }
@@ -911,13 +911,13 @@ inline double fabs(double const value)
 // Scanner functions
 //
 
-void consume(Scanner* scanner)
+void consume(Scanner* const scanner)
 {
     scanner->start = scanner->current;
 }
 
 
-void extract(Scanner* scanner, char* put, size_t const length)
+void extract(Scanner* const scanner, char* put, size_t const length)
 {
     size_t len = (scanner->current - scanner->start) + 1;
     if (len > length)
@@ -931,16 +931,16 @@ void extract(Scanner* scanner, char* put, size_t const length)
 }
 
 
-inline char advance(Scanner* scanner)
+inline char advance(Scanner* const scanner)
 {
     scanner->current++;
     return scanner->current[-1];
 }
 
 
-bool match(Scanner* scanner, char expected)
+bool match(Scanner* const scanner, char const expected)
 {
-    if (isAtEnd(scanner))
+    if (is_at_end(scanner))
     {
         return false;
     }
@@ -954,15 +954,15 @@ bool match(Scanner* scanner, char expected)
 }
 
 
-inline char peek(Scanner* scanner)
+inline char peek(Scanner const* const scanner)
 {
     return scanner->current[0];
 }
 
 
-inline char peekNext(Scanner* scanner)
+inline char peek_next(Scanner const* const scanner)
 {
-    if (isAtEnd(scanner))
+    if (is_at_end(scanner))
     {
         return '\0';
     }
@@ -970,7 +970,7 @@ inline char peekNext(Scanner* scanner)
 }
 
 
-bool isAtEnd(Scanner* scanner)
+bool is_at_end(Scanner const* const scanner)
 {
     switch (scanner->current[0])
     {
@@ -984,23 +984,23 @@ bool isAtEnd(Scanner* scanner)
 }
 
 
-inline bool isDigit(char c)
+inline bool is_digit(char const c)
 {
     return c >= '0' && c <= '9';
 }
 
 
-inline bool isAlpha(char c)
+inline bool is_alpha(char const c)
 {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 }
 
 
-int integer(Scanner* scanner)
+int integer(Scanner* const scanner)
 {
     int val = 0;
 
-    while(isDigit(peek(scanner)))
+    while(is_digit(peek(scanner)))
     {
         advance(scanner);
     }
@@ -1015,7 +1015,7 @@ int integer(Scanner* scanner)
 }
 
 
-void skipWhitespace(Scanner* scanner)
+void skip_whitespace(Scanner* const scanner)
 {
     for (;;)
     {
