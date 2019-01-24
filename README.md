@@ -9,7 +9,7 @@ printfor("(I3, 2(1X, F4.2))", 10, 3.1416, 3.333);
 //  10 3.14 3.33
 ```
 
-In this version, `Iw.m`, `Fw.d`, `Dw.d`, `Ew.d`, `Ew.dEe`, `Gw.d`, `Lw`, `A[w]`,
+In this version, `Iw.m`, `Fw.d`, `Dw.d`, `Ew.d`, `Ew.dEe`, `Gw.d`, `Gw.dEe`, `Lw`, `A[w]`,
 `nX`, `/`, `nH`, and `''` [edit descriptors](http://www.fortran.com/fortran/F77_std/rjcnf0001-sh-13.html#sh-13.5.6) are supported. Both grouping `()` and repeat specification are supported also. See [Supported Features](#supported-features) and [Known Issues](#known-issues) for limitations. 
 Currently, the output goes directly to the output stream (stdout) or to an user specified output stream (with `std::ostream` base class). 
 
@@ -73,7 +73,7 @@ output is basic and don't reflect expected Fortran's.
 | Ew.dEe          |    Yes     |
 | Dw.d            |    Yes     |
 | Gw.d            |    Yes     |
-| Gw.dEe          |    No      |
+| Gw.dEe          |    Yes     |
 | Lw              |    Yes     |
 | A               |    Yes     |
 | Aw              |    Yes     |
@@ -105,7 +105,7 @@ output is basic and don't reflect expected Fortran's.
 #### Real numbers edit descriptors
 
 - Does not handle `-0.0` as expected.
-- Last digit of `Dw.d` and `Ew.d` mantissa is truncated, where in the Fortran's 
+- Last digit of `Dw.d`, `Ew.d`, and `Gw.d` mantissa is truncated, where in the Fortran's 
   implementation it is rounded.
 
 #### `'string'` and `nH` (Hollerith)

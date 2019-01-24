@@ -65,7 +65,7 @@ void write_h(ostream&, Scanner*, size_t const);
 void fill_with_char(char*, char const, size_t const);
 void format_i(char*, int const, size_t const, size_t const);
 void format_f(char*, double const, size_t const, size_t const);
-void format_g(char*, double const, size_t const, size_t const);
+void format_g(char*, double const, size_t const, size_t const, size_t const);
 void format_e(char*, double const, size_t const, size_t const, 
         char const expchar = 'E', 
         size_t const exponent_width = 2);

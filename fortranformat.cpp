@@ -69,7 +69,7 @@ void write_h(ostream&, Scanner*, size_t const);
 void fill_with_char(char*, char const, size_t const);
 void format_i(char*, int const, size_t const, size_t const);
 void format_f(char*, double const, size_t const, size_t const);
-void format_g(char*, double const, size_t const, size_t const);
+void format_g(char*, double const, size_t const, size_t const, size_t const);
 void format_e(char*, double const, size_t const, size_t const, 
         char const expchar = 'E', 
         size_t const exponent_width = DEFAULT_EXPONENT);
@@ -359,6 +359,14 @@ void write_g(ostream& stream, Scanner* scanner, va_list* ap,
     advance(scanner); 
     consume(scanner);
     decimal = integer(scanner);
+
+    size_t exponent = DEFAULT_EXPONENT;
+    if (peek(scanner) == 'E')
+    {
+        advance(scanner); 
+        consume(scanner);
+        exponent = integer(scanner);
+    }
     
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
@@ -366,7 +374,7 @@ void write_g(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_g(put, value, width, decimal);  
+        format_g(put, value, width, decimal, exponent);  
         stream << put;
     }
 }
@@ -762,8 +770,10 @@ void format_e(char* put, double const value, size_t const width,
 
 
 void format_g(char* put, double const value, size_t const width, 
-    size_t const precision)
+    size_t const precision, size_t const exponent)
 {
+    assert(exponent > 0);
+
     double const MIN = 0.1;
     double const MAX = fast_10pow(precision);
     double absvalue = fabs(value);
@@ -771,7 +781,7 @@ void format_g(char* put, double const value, size_t const width,
     if (MIN > absvalue || absvalue >= MAX)
     {
         // format as Ew.dEe
-        format_e(put, value, width, precision, 'E');
+        format_e(put, value, width, precision, 'E', exponent);
     }
     else
     {

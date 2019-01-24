@@ -512,37 +512,44 @@ void test_format_mixfloat()
     char cs[MAXLEN];
     zerostr(cs);
 
+    size_t const EXPONENT = 2;
+
     // below 0.1 and without space
-    format_g(cs, 0.01, 4, 3);
+    format_g(cs, 0.01, 4, 3, EXPONENT);
     TEST_CHECK(compare_strings(cs, "****"));
     zerostr(cs);
 
     // below 0.1 and without space
-    format_g(cs, 0.01, 8, 3);
+    format_g(cs, 0.01, 8, 3, EXPONENT);
     TEST_CHECK(compare_strings(cs, ".100E-01"));
     zerostr(cs);
 
     // above 10**d
-    format_g(cs, 1500., 8, 3);
+    format_g(cs, 1500., 8, 3, EXPONENT);
     TEST_CHECK(compare_strings(cs, ".150E+04"));
     zerostr(cs);
 
+    // above 10**d
+    format_g(cs, 1500., 9, 3, 3);
+    TEST_CHECK(compare_strings(cs, ".150E+004"));
+    zerostr(cs);
+
     // several cases between 0.1 and 10**d
-    format_g(cs, 1500., 9, 4);
+    format_g(cs, 1500., 9, 4, EXPONENT);
     TEST_CHECK(compare_strings(cs, "1500.    "));
     zerostr(cs);
 
     // several cases between 0.1 and 10**d
-    format_g(cs, 1500., 10, 4);
+    format_g(cs, 1500., 10, 4, EXPONENT);
     TEST_CHECK(compare_strings(cs, " 1500.    "));
     zerostr(cs);
 
     // several cases between 0.1 and 10**d
-    format_g(cs, 1500., 11, 4);
+    format_g(cs, 1500., 11, 4, EXPONENT);
     TEST_CHECK(compare_strings(cs, "  1500.    "));
     zerostr(cs);
 
-    format_g(cs, -1500., 11, 5);
+    format_g(cs, -1500., 11, 5, EXPONENT);
     TEST_CHECK(compare_strings(cs, "-1500.0    "));
     zerostr(cs);
 }
