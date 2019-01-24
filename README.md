@@ -9,8 +9,8 @@ printfor("(I3, 2(1X, F4.2))", 10, 3.1416, 3.333);
 //  10 3.14 3.33
 ```
 
-In this version, `Iw.m`, `Fw.d`, `Dw.d`, `Ew.d`, `Gw.d`, `Lw`, `A[w]`, `nX`, `/`, `nH`, and `''`
-[edit descriptors](http://www.fortran.com/fortran/F77_std/rjcnf0001-sh-13.html#sh-13.5.6) are supported. Both grouping `()` and repeat specification are supported also. See [Supported Features](#supported-features) and [Known Issues](#known-issues) for limitations. 
+In this version, `Iw.m`, `Fw.d`, `Dw.d`, `Ew.d`, `Ew.dEe`, `Gw.d`, `Lw`, `A[w]`,
+`nX`, `/`, `nH`, and `''` [edit descriptors](http://www.fortran.com/fortran/F77_std/rjcnf0001-sh-13.html#sh-13.5.6) are supported. Both grouping `()` and repeat specification are supported also. See [Supported Features](#supported-features) and [Known Issues](#known-issues) for limitations. 
 Currently, the output goes directly to the output stream (stdout) or to an user specified output stream (with `std::ostream` base class). 
 
 
@@ -70,7 +70,7 @@ output is basic and don't reflect expected Fortran's.
 | Iw.m            |    Yes     |
 | Fw.d            |    Yes     |
 | Ew.d            |    Yes     |
-| Ew.dEe          |    No      |
+| Ew.dEe          |    Yes     |
 | Dw.d            |    Yes     |
 | Gw.d            |    Yes     |
 | Gw.dEe          |    No      |

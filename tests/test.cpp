@@ -189,6 +189,9 @@ void test_basic()
     format_e(cs, -1234.678, 13, 5); // __-0.1235D+04
     std::cout << "  |" << cs << '\n';
 
+    format_e(cs, -1234.678, 13, 5, 'E', 3); // -0.12347E+004
+    std::cout << "  |" << cs << '\n';
+
 
     // fractional part extraction
     extract_decimal_part(cs, 3.14, 2);
@@ -295,6 +298,11 @@ void test_float()
 
     printfor(ss, "( E10.3, E11.4, E13.6 )", 12345678.0, 23.5678, 0.345678 );
     TEST_CHECK(compare_strings(ss.str().c_str(), " 0.123E+08 0.2357E+02 0.345678E+00"));
+    std::cout << "  |" << ss.str() << '\n';
+    ss.str(std::string());
+
+    printfor(ss, "(E13.5E3)", -1234.678 );
+    TEST_CHECK(compare_strings(ss.str().c_str(), "-0.12347E+004"));
     std::cout << "  |" << ss.str() << '\n';
     ss.str(std::string());
 }

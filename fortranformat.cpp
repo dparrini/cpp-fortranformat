@@ -21,6 +21,7 @@
 // IN THE SOFTWARE.
 
 
+#include <cassert>
 #include <cmath>
 #include <cstdarg>
 #include <cstring>
@@ -70,7 +71,8 @@ void format_i(char*, int const, size_t const, size_t const);
 void format_f(char*, double const, size_t const, size_t const);
 void format_g(char*, double const, size_t const, size_t const);
 void format_e(char*, double const, size_t const, size_t const, 
-        char const expchar = 'E');
+        char const expchar = 'E', 
+        size_t const exponent_width = DEFAULT_EXPONENT);
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
@@ -304,7 +306,7 @@ void write_d(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_e(put, value, width, decimal, 'D');  
+        format_e(put, value, width, decimal, 'D', DEFAULT_EXPONENT);  
         stream << put;
     }
 }
@@ -323,6 +325,14 @@ void write_e(ostream& stream, Scanner* scanner, va_list* ap,
     advance(scanner); 
     consume(scanner);
     decimal = integer(scanner);
+
+    size_t exponent = DEFAULT_EXPONENT;
+    if (peek(scanner) == 'E')
+    {
+        advance(scanner); 
+        consume(scanner);
+        exponent = integer(scanner);
+    }
     
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
@@ -330,7 +340,7 @@ void write_e(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_e(put, value, width, decimal, 'E');  
+        format_e(put, value, width, decimal, 'E', exponent);  
         stream << put;
     }
 }
@@ -646,15 +656,17 @@ void format_f(char* put, double const value, size_t const width,
 
 
 void format_e(char* put, double const value, size_t const width, 
-    size_t const precision, char const expchar)
+    size_t const precision, char const expchar, size_t const exponent_width)
 {
+    assert(exponent_width > 0);
+
     double absvalue = fabs(value);
     bool require_sign = value < 0;
 
     // minimum length without leading zero
-    // . precision D+00
-    size_t const FORMATCHARS = 5;
-    size_t const MINLEN = require_sign + FORMATCHARS + precision;
+    // . precision D+00, ., D, and + = 3
+    size_t const FORMATCHARS = 3;
+    size_t const MINLEN = require_sign + FORMATCHARS + precision + exponent_width;
 
     // check whether there's space for a leading zero
     bool include_leading_zero = width > MINLEN;
@@ -742,8 +754,8 @@ void format_e(char* put, double const value, size_t const width,
         pos = pos + 1;
 
         // exponent value
-        format_i(put + pos, abs(exponent), DEFAULT_EXPONENT, DEFAULT_EXPONENT);
-        pos = pos + 2;
+        format_i(put + pos, abs(exponent), exponent_width, exponent_width);
+        pos = pos + exponent_width;
     }
     put[pos] = '\0';
 }
