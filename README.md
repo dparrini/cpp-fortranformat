@@ -9,9 +9,9 @@ printfor("(I3, 2(1X, F4.2))", 10, 3.1416, 3.333);
 //  10 3.14 3.33
 ```
 
-In this version, only `Iw.m`, `Fw.d`, `Dw.d`, `Ew.d`, `Gw.d`, `Lw`, `A[w]`, `nX`, `/`, `nH`, and `''`
-[edit descriptors](http://www.fortran.com/fortran/F77_std/rjcnf0001-sh-13.html#sh-13.5.6) are supported. Both grouping `()` and repeat specification are supported also.
-Currently, the output goes directly to the output stream (stdout) or to a user specified output stream (with `std::ostream` base class). 
+In this version, `Iw.m`, `Fw.d`, `Dw.d`, `Ew.d`, `Gw.d`, `Lw`, `A[w]`, `nX`, `/`, `nH`, and `''`
+[edit descriptors](http://www.fortran.com/fortran/F77_std/rjcnf0001-sh-13.html#sh-13.5.6) are supported. Both grouping `()` and repeat specification are supported also. See [Supported Features](#supported-features) and [Known Issues](#known-issues) for limitations. 
+Currently, the output goes directly to the output stream (stdout) or to an user specified output stream (with `std::ostream` base class). 
 
 
 This work is inspired by [py-fortranformat](https://bitbucket.org/brendanarnold/py-fortranformat/wiki/Home). Also, [Acutest](https://github.com/mity/acutest) is used as unit testing facility.
@@ -108,7 +108,7 @@ output is basic and don't reflect expected Fortran's.
 - Last digit of `Dw.d` and `Ew.d` mantissa is truncated, where in the Fortran's 
   implementation it is rounded.
 
-#### `'string'` and `nH`
+#### `'string'` and `nH` (Hollerith)
 
 - Doesn't support escaping `''`.
 

@@ -67,8 +67,8 @@ void fill_with_char(char*, char const, size_t const);
 void format_i(char*, int const, size_t const, size_t const);
 void format_f(char*, double const, size_t const, size_t const);
 void format_g(char*, double const, size_t const, size_t const);
-void format_d(char*, double const, size_t const, size_t const, 
-        char const expchar = 'D');
+void format_e(char*, double const, size_t const, size_t const, 
+        char const expchar = 'E');
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);

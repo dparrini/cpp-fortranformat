@@ -26,6 +26,9 @@ void zerostr(char* str);
 
 size_t const MAXLEN = 200;
 
+// default exponent width
+size_t const DEFAULT_EXPONENT = 2;
+
 
 bool compare_strings(char const* str1, char const* str2)
 {
@@ -173,17 +176,17 @@ void test_basic()
     format_i(cs, -1, 7, 3); // ___-001
     std::cout << "  |" << cs << '\n';
 
-    format_d(cs, 1234.678, 9, 3); // 0.123D+04
+    format_e(cs, 1234.678, 9, 3); // 0.123D+04
     std::cout << "  |" << cs << '\n';
 
-    format_d(cs, 1234.678, 8, 4); // ********
+    format_e(cs, 1234.678, 8, 4); // ********
     std::cout << "  |" << cs << '\n';
-    format_d(cs, 1234.678, 13, 4); // ___0.1235D+04
+    format_e(cs, 1234.678, 13, 4); // ___0.1235D+04
     std::cout << "  |" << cs << '\n';
-    format_d(cs, -1234.678, 13, 4); // __-0.1235D+04
+    format_e(cs, -1234.678, 13, 4); // __-0.1235D+04
     std::cout << "  |" << cs << '\n';
 
-    format_d(cs, -1234.678, 13, 5); // __-0.1235D+04
+    format_e(cs, -1234.678, 13, 5); // __-0.1235D+04
     std::cout << "  |" << cs << '\n';
 
 

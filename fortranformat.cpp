@@ -32,6 +32,9 @@ using std::ostream;
 
 size_t const MAX_STR_LEN = 200;
 
+// default exponent width
+size_t const DEFAULT_EXPONENT = 2;
+
 #ifndef DEBUG
 
 struct Scanner {
@@ -66,8 +69,8 @@ void fill_with_char(char*, char const, size_t const);
 void format_i(char*, int const, size_t const, size_t const);
 void format_f(char*, double const, size_t const, size_t const);
 void format_g(char*, double const, size_t const, size_t const);
-void format_d(char*, double const, size_t const, size_t const, 
-        char const expchar = 'D');
+void format_e(char*, double const, size_t const, size_t const, 
+        char const expchar = 'E');
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
@@ -301,7 +304,7 @@ void write_d(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_d(put, value, width, decimal, 'D');  
+        format_e(put, value, width, decimal, 'D');  
         stream << put;
     }
 }
@@ -327,7 +330,7 @@ void write_e(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_d(put, value, width, decimal, 'E');  
+        format_e(put, value, width, decimal, 'E');  
         stream << put;
     }
 }
@@ -639,11 +642,10 @@ void format_f(char* put, double const value, size_t const width,
         }   
     }
     put[width] = '\0';
-
 }
 
 
-void format_d(char* put, double const value, size_t const width, 
+void format_e(char* put, double const value, size_t const width, 
     size_t const precision, char const expchar)
 {
     double absvalue = fabs(value);
@@ -740,7 +742,7 @@ void format_d(char* put, double const value, size_t const width,
         pos = pos + 1;
 
         // exponent value
-        format_i(put + pos, abs(exponent), 2, 2);
+        format_i(put + pos, abs(exponent), DEFAULT_EXPONENT, DEFAULT_EXPONENT);
         pos = pos + 2;
     }
     put[pos] = '\0';
@@ -757,7 +759,7 @@ void format_g(char* put, double const value, size_t const width,
     if (MIN > absvalue || absvalue >= MAX)
     {
         // format as Ew.dEe
-        format_d(put, value, width, precision, 'E');
+        format_e(put, value, width, precision, 'E');
     }
     else
     {
