@@ -105,8 +105,7 @@ output is basic and don't reflect expected Fortran's.
 #### Real numbers edit descriptors
 
 - Does not handle `-0.0` as expected.
-- Last digit of `Dw.d`, `Ew.d`, and `Gw.d` mantissa is truncated, where in the Fortran's 
-  implementation it is rounded.
+- Integer part of `Fw.d` is not rounded if `w=0` and its first fractional digit is equal or greater than 5.
 
 #### `'string'` and `nH` (Hollerith)
 

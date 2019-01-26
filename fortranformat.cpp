@@ -76,7 +76,7 @@ void format_e(char*, double const, size_t const, size_t const,
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
-void extract_integer_part(char*, double const);
+void extract_integer_part(char*, double const, bool const);
 void extract_fractional_part(char*, double const, size_t const, bool const);
 
 void consume(Scanner* const);
@@ -597,6 +597,7 @@ void format_i(char* put, int const value, size_t const width, size_t const fill)
         {
             size_t power = fast_10pow(len - n - 1);
             unsigned int newvalue = static_cast<int>(intpart / power);
+
             put[pos] = newvalue + '0';
 
             intpart = intpart - newvalue * power;
@@ -614,7 +615,8 @@ void format_f(char* put, double const value, size_t const width,
     // integer part
     int intval = abs(static_cast<int>(value));
     char intstr[MAX_STR_LEN];
-    extract_integer_part(intstr, intval);
+    bool ROUNDED = false;
+    extract_integer_part(intstr, intval, ROUNDED);
     size_t const INTLEN = strlen(intstr);
 
     // the integer part output is optional when its = 0
@@ -622,7 +624,7 @@ void format_f(char* put, double const value, size_t const width,
 
     // fractional part
     char fracstr[MAX_STR_LEN];
-    bool const ROUNDED = true;
+    ROUNDED = true;
     extract_fractional_part(fracstr, value, precision, ROUNDED);
     size_t const FRACLEN = precision;
 
@@ -745,7 +747,7 @@ void format_e(char* put, double const value, size_t const width,
         }
         // final number after the decimal separator
         finalnumber = absvalue * power;
-        unsigned int intval = static_cast<unsigned int>(finalnumber);
+        unsigned int intval = static_cast<unsigned int>(round(finalnumber));
 
         // right-alignment whitespace
         if (width > LEN)
@@ -891,9 +893,11 @@ size_t integer_str_length(unsigned int const value)
 }
 
 
-void extract_integer_part(char* put, double const value)
+void extract_integer_part(char* put, double const value, 
+    bool const rounded_last_digit)
 {
     // TODO: can be refactored, see format_i
+    double absvalue = fabs(value);
     unsigned int intpart = abs(static_cast<int>(value));
     size_t const digits = integer_str_length(abs(intpart));
 
@@ -901,6 +905,14 @@ void extract_integer_part(char* put, double const value)
     {
         size_t power = fast_10pow(digits - pos - 1);
         unsigned int newvalue = static_cast<int>(intpart / power);
+
+        // round last digit
+        if (rounded_last_digit && pos == digits - 1)
+        {
+            double lastval = round(absvalue - static_cast<int>(absvalue/10.0) * 10.0);
+            newvalue = static_cast<int>(lastval);
+        }
+
         put[pos] = newvalue + '0';
 
         intpart = intpart - newvalue * power;

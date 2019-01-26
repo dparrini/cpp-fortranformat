@@ -72,7 +72,7 @@ void format_e(char*, double const, size_t const, size_t const,
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
-void extract_integer_part(char*, double const);
+void extract_integer_part(char*, double const, bool const);
 void extract_fractional_part(char*, double const, size_t const, bool const);
 
 void consume(Scanner* const);

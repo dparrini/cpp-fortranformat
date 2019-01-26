@@ -231,23 +231,27 @@ void test_basic()
     TEST_CHECK(integer_str_length(100000003) == 9);
 
     // integer parts
-    extract_integer_part(cs, 0.45);
+    extract_integer_part(cs, 0.45, false);
     TEST_CHECK(compare_strings(cs, "0"));
     zerostr(cs);
 
-    extract_integer_part(cs, 11.3);
+    extract_integer_part(cs, 11.3, false);
     TEST_CHECK(compare_strings(cs, "11"));
     zerostr(cs);
 
-    extract_integer_part(cs, 100.7003);
+    extract_integer_part(cs, 100.7003, false);
     TEST_CHECK(compare_strings(cs, "100"));
     zerostr(cs);
 
-    extract_integer_part(cs, 1063.0);
+    extract_integer_part(cs, 100.7003, true);
+    TEST_CHECK(compare_strings(cs, "101"));
+    zerostr(cs);
+
+    extract_integer_part(cs, 1063.0, false);
     TEST_CHECK(compare_strings(cs, "1063"));
     zerostr(cs);
 
-    extract_integer_part(cs, 100000003.0004);
+    extract_integer_part(cs, 100000003.0004, false);
     TEST_CHECK(compare_strings(cs, "100000003"));
     zerostr(cs);
 
@@ -299,6 +303,14 @@ void test_float()
     TEST_CHECK(compare_strings(ss.str().c_str(), "  3.001"));
     ss.str(std::string());
 
+    printfor(ss, "(F7.3)", -3.001745);
+    TEST_CHECK(compare_strings(ss.str().c_str(), " -3.002"));
+    ss.str(std::string());
+
+    printfor(ss, "(F7.0)", 3.501345);
+    TEST_CHECK(compare_strings(ss.str().c_str(), "     4."));
+    ss.str(std::string());
+
     printfor(ss, "(F7.0)", 3.001345);
     TEST_CHECK(compare_strings(ss.str().c_str(), "     3."));
     ss.str(std::string());
@@ -310,17 +322,14 @@ void test_float()
     // D and E
     printfor(ss, "(D9.3, 1X, D8.4, 1X, D13.4)", 1234.678, 1234.678 , 1234.678 );
     TEST_CHECK(compare_strings(ss.str().c_str(), "0.123D+04 ********    0.1235D+04"));
-    std::cout << "  |" << ss.str() << '\n';
     ss.str(std::string());
 
     printfor(ss, "( E10.3, E11.4, E13.6 )", 12345678.0, 23.5678, 0.345678 );
     TEST_CHECK(compare_strings(ss.str().c_str(), " 0.123E+08 0.2357E+02 0.345678E+00"));
-    std::cout << "  |" << ss.str() << '\n';
     ss.str(std::string());
 
     printfor(ss, "(E13.5E3)", -1234.678 );
     TEST_CHECK(compare_strings(ss.str().c_str(), "-0.12347E+004"));
-    std::cout << "  |" << ss.str() << '\n';
     ss.str(std::string());
 }
 
