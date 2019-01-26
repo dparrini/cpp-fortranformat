@@ -73,7 +73,7 @@ size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
 void extract_integer_part(char*, double const);
-void extract_decimal_part(char*, double const, size_t const);
+void extract_decimal_part(char*, double const, size_t const, bool const);
 
 void consume(Scanner* const);
 void extract(Scanner* const, char*, size_t const);

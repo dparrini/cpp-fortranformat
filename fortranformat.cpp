@@ -77,7 +77,7 @@ size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
 void extract_integer_part(char*, double const);
-void extract_decimal_part(char*, double const, size_t const);
+void extract_decimal_part(char*, double const, size_t const, bool const);
 
 void consume(Scanner* const);
 void extract(Scanner* const, char*, size_t const);
@@ -622,7 +622,8 @@ void format_f(char* put, double const value, size_t const width,
 
     // fractional part
     char fracstr[MAX_STR_LEN];
-    extract_decimal_part(fracstr, value, precision);
+    bool const ROUNDED = true;
+    extract_decimal_part(fracstr, value, precision, ROUNDED);
     size_t const FRACLEN = precision;
 
     // 0. precision D+00
@@ -929,20 +930,35 @@ size_t frac_zeroes(double const value)
 }
 
 
-void extract_decimal_part(char* put, double const value, size_t const precision)
+void extract_decimal_part(char* put, double const value, size_t const precision, 
+    bool const rounded_last_digit)
 {
     double absvalue = fabs(value);
+
+    if (rounded_last_digit)
+    {
+        double last_digit = fast_10pow(precision) * absvalue;
+        // last digit under specified precision, multiplied by 10
+        int last_digit_int = static_cast<int>(last_digit) * 10;
+        double digit_after = fast_10pow(precision + 1) * absvalue - last_digit_int;
+
+        if (static_cast<int>(fabs(round(digit_after))) >= 5)
+        {
+            absvalue = absvalue + 1.0 / static_cast<double>(fast_10pow(precision));
+        }
+    }
+
     int intpart = static_cast<int>(absvalue);
     double decpart = absvalue - intpart;
 
     // power of ten
     double power = 1;
-    for (size_t pw = 1; pw <= precision; ++pw)
+    for (size_t pw = 0; pw < precision; ++pw)
     {
         power = power * 10;
         decpart = absvalue * power - static_cast<int>(absvalue*(power/10))*10;
         intpart = static_cast<int>(decpart);
-        put[pw-1] = intpart + '0';
+        put[pw] = intpart + '0';
     }
     put[precision] = '\0';
 }
