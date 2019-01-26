@@ -455,10 +455,17 @@ void write_x(ostream& stream, Scanner* scanner,
 
 void write_str(ostream& stream, Scanner* scanner)
 {
+    // extracted string
+    char valstr[MAX_STR_LEN];
+    // pointer to current character being written
+    char* strinit = valstr;
+
+    size_t length_left = MAX_STR_LEN;
+
     consume(scanner); // consume opening '
     for (;;)
     {
-        // TODO: deal with '' escape
+        // TODO: test length_left for 0 value or underflow
         char c = peek(scanner);
         if ('\'' == c)
         {
@@ -468,9 +475,16 @@ void write_str(ostream& stream, Scanner* scanner)
             }
             else
             {
+                // consume one of the quotation marks
+                advance(scanner);
+                // copy characters until the first quotation mark
+                extract(scanner, strinit, length_left);
+                // move pointer
+                strinit = strinit + strlen(strinit);
+                length_left = MAX_STR_LEN - (strinit - valstr);
                 // jump escape character
                 advance(scanner);
-                advance(scanner);
+                consume(scanner);
             }
         }
         else
@@ -479,8 +493,8 @@ void write_str(ostream& stream, Scanner* scanner)
         }
     }
     // extract string before last '
-    char valstr[MAX_STR_LEN];
-    extract(scanner, valstr, MAX_STR_LEN);
+    
+    extract(scanner, strinit, length_left);
 
     advance(scanner);
     consume(scanner); // consume last '

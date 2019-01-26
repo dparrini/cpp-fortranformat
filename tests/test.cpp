@@ -369,8 +369,13 @@ void test_string()
     TEST_CHECK(compare_strings(ss.str().c_str(), "test different"));
     ss.str(std::string());
 
-    printfor(ss, "('This is an ''escaped'' single quote', A)", ".");
-    TEST_CHECK(compare_strings(ss.str().c_str(), "This is an 'escaped' single quote."));
+    printfor(ss, "('This is an ''escaped'' '' single quotation mark', A)", ".");
+    TEST_CHECK(compare_strings(ss.str().c_str(), "This is an 'escaped' ' single quotation mark."));
+    ss.str(std::string());
+
+    printfor(ss, "('''''''', A)", " test");
+    TEST_CHECK(compare_strings(ss.str().c_str(), "''' test"));
+    std::cout << ss.str().c_str() << std::endl;
     ss.str(std::string());
 
     printfor(ss, "(5Htest , A)", "different");
