@@ -13,7 +13,7 @@ void test_integer();
 void test_float();
 void test_logical();
 void test_repeat();
-void test_alpha();
+void test_string();
 void test_combined();
 void test_nonrepeat();
 void test_format_float();
@@ -143,7 +143,7 @@ TEST_LIST = {
     { "integer", test_integer },
     { "float", test_float },
     { "logical", test_logical },
-    { "alpha", test_alpha },
+    { "alpha", test_string },
     { "repeat", test_repeat },
     { "combined", test_combined },
     { "format_nonrepeat", test_nonrepeat },
@@ -344,7 +344,7 @@ void test_repeat()
 }
 
 
-void test_alpha()
+void test_string()
 {
     std::cout << '\n';
     std::ostringstream ss;
@@ -367,6 +367,10 @@ void test_alpha()
 
     printfor(ss, "('test', A)", " different");
     TEST_CHECK(compare_strings(ss.str().c_str(), "test different"));
+    ss.str(std::string());
+
+    printfor(ss, "('This is an ''escaped'' single quote', A)", ".");
+    TEST_CHECK(compare_strings(ss.str().c_str(), "This is an 'escaped' single quote."));
     ss.str(std::string());
 
     printfor(ss, "(5Htest , A)", "different");

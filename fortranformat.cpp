@@ -462,7 +462,16 @@ void write_str(ostream& stream, Scanner* scanner)
         char c = peek(scanner);
         if ('\'' == c)
         {
-            break;
+            if (peek_next(scanner) != '\'')
+            {
+                break;
+            }
+            else
+            {
+                // jump escape character
+                advance(scanner);
+                advance(scanner);
+            }
         }
         else
         {
