@@ -58,7 +58,7 @@ void write_l(ostream&, Scanner*, va_list*, size_t const repeat = 1);
 void write_a(ostream&, Scanner*, va_list*, size_t const repeat = 1);
 
 void write_x(ostream&, Scanner*, size_t const repeat = 1);
-void write_str(ostream&, Scanner*);
+void write_str(ostream&, Scanner*, char const);
 void write_nl(ostream&, Scanner*);
 void write_h(ostream&, Scanner*, size_t const);
 

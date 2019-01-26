@@ -111,7 +111,7 @@ output is basic and don't reflect expected Fortran's.
 #### `'string'` and `nH` (Hollerith)
 
 - Doesn't support escaping with `''` (within `nH`).
-- Doesn't support double quotation marks.
+- Doesn't escape single quotation marks `'` within double quotation marks strings and vice-versa.
 
 #### `w` zeroed or omitted
 

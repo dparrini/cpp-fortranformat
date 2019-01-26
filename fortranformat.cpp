@@ -62,7 +62,7 @@ void write_l(ostream&, Scanner*, va_list*, size_t const repeat = 1);
 void write_a(ostream&, Scanner*, va_list*, size_t const repeat = 1);
 
 void write_x(ostream&, Scanner*, size_t const repeat = 1);
-void write_str(ostream&, Scanner*);
+void write_str(ostream&, Scanner*, char const);
 void write_nl(ostream&, Scanner*);
 void write_h(ostream&, Scanner*, size_t const);
 
@@ -205,7 +205,11 @@ void write_group(ostream& stream, Scanner* scanner, va_list* ap)
         }
         else if ('\'' == c)
         {
-            write_str(stream, scanner);
+            write_str(stream, scanner, '\'');
+        }
+        else if ('"' == c)
+        {
+            write_str(stream, scanner, '"');
         }
         else if (')' == c)
         {
@@ -453,7 +457,7 @@ void write_x(ostream& stream, Scanner* scanner,
 }
 
 
-void write_str(ostream& stream, Scanner* scanner)
+void write_str(ostream& stream, Scanner* scanner, char const opening)
 {
     // extracted string
     char valstr[MAX_STR_LEN];
@@ -462,14 +466,14 @@ void write_str(ostream& stream, Scanner* scanner)
 
     size_t length_left = MAX_STR_LEN;
 
-    consume(scanner); // consume opening '
+    consume(scanner); // consume opening ' or "
     for (;;)
     {
         // TODO: test length_left for 0 value or underflow
         char c = peek(scanner);
-        if ('\'' == c)
+        if (opening == c)
         {
-            if (peek_next(scanner) != '\'')
+            if (peek_next(scanner) != opening)
             {
                 break;
             }
