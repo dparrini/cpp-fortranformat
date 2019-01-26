@@ -143,7 +143,7 @@ TEST_LIST = {
     { "integer", test_integer },
     { "float", test_float },
     { "logical", test_logical },
-    { "alpha", test_string },
+    { "string", test_string },
     { "repeat", test_repeat },
     { "combined", test_combined },
     { "format_nonrepeat", test_nonrepeat },

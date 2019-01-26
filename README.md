@@ -102,20 +102,12 @@ output is basic and don't reflect expected Fortran's.
 
 ### Known Issues
 
-#### Real numbers edit descriptors
-
+- There is no check against malformed format string
 - Does not handle `-0.0` as expected.
-- Integer part of `Fw.d` is not rounded if `w=0` and its first fractional digit is equal or greater than 5.
-
-#### `'string'` and `nH` (Hollerith)
-
-- Doesn't support escaping with `''` (within `nH`).
+- Doesn't support escaping quotes by repeating it, such as `''` or `""`, within `nH`.
 - Doesn't escape single quotation marks `'` within double quotation marks strings and vice-versa.
-
-#### `w` zeroed or omitted
-
 - No error is thrown when `w=0`.
-- If omitted, no error is thrown.
+- No default values for omitted `w` and `d`.
 
 
 ## Documentation

@@ -638,6 +638,13 @@ void format_f(char* put, double const value, size_t const width,
     {
         fill_with_char(put, '*', width);
     }
+    else if (precision == 0)
+    {
+        // an integer with a following dot
+        int rounded_intval = static_cast<int>(round(value));
+        format_i(put, rounded_intval, width - 1, 0);
+        put[width - 1] = '.';
+    }
     else
     {
         // actual length, possibly including a leading zero for x < 1.0
