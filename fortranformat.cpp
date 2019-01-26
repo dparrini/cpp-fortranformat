@@ -77,7 +77,7 @@ size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
 void extract_integer_part(char*, double const);
-void extract_decimal_part(char*, double const, size_t const, bool const);
+void extract_fractional_part(char*, double const, size_t const, bool const);
 
 void consume(Scanner* const);
 void extract(Scanner* const, char*, size_t const);
@@ -269,12 +269,12 @@ void write_f(ostream& stream, Scanner* scanner, va_list* ap,
     consume(scanner);
 
     int width = integer(scanner);
-    int decimal = 0;
+    int fractional = 0;
 
     // dot character
     advance(scanner); 
     consume(scanner);
-    decimal = integer(scanner);
+    fractional = integer(scanner);
     
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
@@ -282,7 +282,7 @@ void write_f(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_f(put, value, width, decimal);  
+        format_f(put, value, width, fractional);  
         std::ios_base::fmtflags f(stream.flags());
         stream << std::setw(width) << std::right << put;
         stream.flags(f);  
@@ -297,12 +297,12 @@ void write_d(ostream& stream, Scanner* scanner, va_list* ap,
     consume(scanner);
 
     int width = integer(scanner);
-    int decimal = 0;
+    int fractional = 0;
 
     // dot character
     advance(scanner); 
     consume(scanner);
-    decimal = integer(scanner);
+    fractional = integer(scanner);
     
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
@@ -310,7 +310,7 @@ void write_d(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_e(put, value, width, decimal, 'D', DEFAULT_EXPONENT);  
+        format_e(put, value, width, fractional, 'D', DEFAULT_EXPONENT);  
         stream << put;
     }
 }
@@ -323,12 +323,12 @@ void write_e(ostream& stream, Scanner* scanner, va_list* ap,
     consume(scanner);
 
     int width = integer(scanner);
-    int decimal = 0;
+    int fractional = 0;
 
     // dot character
     advance(scanner); 
     consume(scanner);
-    decimal = integer(scanner);
+    fractional = integer(scanner);
 
     size_t exponent = DEFAULT_EXPONENT;
     if (peek(scanner) == 'E')
@@ -344,7 +344,7 @@ void write_e(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_e(put, value, width, decimal, 'E', exponent);  
+        format_e(put, value, width, fractional, 'E', exponent);  
         stream << put;
     }
 }
@@ -357,12 +357,12 @@ void write_g(ostream& stream, Scanner* scanner, va_list* ap,
     consume(scanner);
 
     int width = integer(scanner);
-    int decimal = 0;
+    int fractional = 0;
 
     // dot character
     advance(scanner); 
     consume(scanner);
-    decimal = integer(scanner);
+    fractional = integer(scanner);
 
     size_t exponent = DEFAULT_EXPONENT;
     if (peek(scanner) == 'E')
@@ -378,7 +378,7 @@ void write_g(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_g(put, value, width, decimal, exponent);  
+        format_g(put, value, width, fractional, exponent);  
         stream << put;
     }
 }
@@ -623,7 +623,7 @@ void format_f(char* put, double const value, size_t const width,
     // fractional part
     char fracstr[MAX_STR_LEN];
     bool const ROUNDED = true;
-    extract_decimal_part(fracstr, value, precision, ROUNDED);
+    extract_fractional_part(fracstr, value, precision, ROUNDED);
     size_t const FRACLEN = precision;
 
     // 0. precision D+00
@@ -716,7 +716,7 @@ void format_e(char* put, double const value, size_t const width,
     }
     else
     {
-        // calculate the decimal part and the exponent
+        // calculate the fractional part and the exponent
         double finalnumber;
         int exponent;
         double power;
@@ -930,7 +930,7 @@ size_t frac_zeroes(double const value)
 }
 
 
-void extract_decimal_part(char* put, double const value, size_t const precision, 
+void extract_fractional_part(char* put, double const value, size_t const precision, 
     bool const rounded_last_digit)
 {
     double absvalue = fabs(value);

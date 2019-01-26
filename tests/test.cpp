@@ -194,32 +194,32 @@ void test_basic()
 
 
     // fractional part extraction
-    extract_decimal_part(cs, 3.14, 2, false);
+    extract_fractional_part(cs, 3.14, 2, false);
     TEST_CHECK(compare_strings(cs, "14"));
     zerostr(cs);
 
-    extract_decimal_part(cs, 3.00, 2, false);
+    extract_fractional_part(cs, 3.00, 2, false);
     TEST_CHECK(compare_strings(cs, "00"));
     zerostr(cs);
 
-    extract_decimal_part(cs,  4.00002, 5, false);
+    extract_fractional_part(cs,  4.00002, 5, false);
     TEST_CHECK(compare_strings(cs, "00002"));
     zerostr(cs);
 
     // test fractional part rounding
-    extract_decimal_part(cs,  4.00005, 4, true);
+    extract_fractional_part(cs,  4.00005, 4, true);
     TEST_CHECK(compare_strings(cs, "0001"));
     zerostr(cs);
 
-    extract_decimal_part(cs,  5.000005, 5, true);
+    extract_fractional_part(cs,  5.000005, 5, true);
     TEST_CHECK(compare_strings(cs, "00001"));
     zerostr(cs);
 
-    extract_decimal_part(cs, 14.01004, 4, true);
+    extract_fractional_part(cs, 14.01004, 4, true);
     TEST_CHECK(compare_strings(cs, "0100"));
     zerostr(cs);
 
-    extract_decimal_part(cs, 14.01097, 4, true);
+    extract_fractional_part(cs, 14.01097, 4, true);
     TEST_CHECK(compare_strings(cs, "0110"));
     zerostr(cs);
 
