@@ -20,123 +20,18 @@ void test_plus_sign();
 void test_format_float();
 void test_format_mixfloat();
 
+bool compare_strings(char const*, char const*);
+bool compare_strings(std::string, std::string);
 
 void trim_lb(char const* source, char* dest);
 std::string trim_lb(std::string source);
 void zerostr(char* str);
 
+
 size_t const MAXLEN = 200;
 
 // default exponent width
 size_t const DEFAULT_EXPONENT = 2;
-
-
-bool compare_strings(char const* str1, char const* str2)
-{
-    // std::cout << str1 << '\n' << str2 << '\n';
-    char nstr1[MAXLEN];
-    trim_lb(str1, nstr1);
-    char nstr2[MAXLEN];
-    trim_lb(str2, nstr2);
-
-    return strcmp(nstr1, nstr2) == 0;
-}
-
-
-bool compare_strings(std::string str1, std::string str2)
-{
-    std::string nstr1 = trim_lb(str1);
-    std::string nstr2 = trim_lb(str2);
-    return nstr1 == nstr2;
-}
-
-
-void compare_strings_print(char const* str1, char const* str2)
-{
-    size_t min_len;
-    if (strlen(str1) > strlen(str2))
-    {
-        min_len = strlen(str2);
-    }
-    else
-    {
-        min_len = strlen(str1);
-    }
-
-    for (size_t n = 0; n < MAXLEN; ++n)
-    {
-        std::cout << std::setw(3) << std::right << n + 1 << ". ";
-        std::string char1, char2;
-
-        
-        if (n < min_len)
-        {
-            char1 = str1[n];
-            char2 = str2[n];
-        }
-        else if (n > min_len && min_len == strlen(str1))
-        {
-            char1 = "";
-            char2 = str2[n];
-        }
-        else if (n > min_len && min_len == strlen(str2))
-        {
-            char1 = str1[n];
-            char2 = "";
-        }
-
-        if ("\n" == char1) char1 = "\\n";
-        if ("\n" == char2) char2 = "\\n";
-        if ("\0" == char1) char1 = "\\0";
-        if ("\0" == char2) char2 = "\\0";
-
-        std::cout << std::right << std::setw(2) << str1[n];
-        std::cout << " " << std::right << std::setw(2) << str2[n] << '\n'; 
-    }
-}
-
-
-void compare_strings_print(std::string str1, std::string str2)
-{
-    size_t min_len;
-    if (str1.size() > str2.size())
-    {
-        min_len = str2.size();
-    }
-    else
-    {
-        min_len = str1.size();
-    }
-
-    for (size_t n = 0; n < MAXLEN; ++n)
-    {
-        std::cout << std::setw(3) << std::right << n + 1 << ". ";
-        std::string char1, char2;
-
-        
-        if (n < min_len)
-        {
-            char1 = str1[n];
-            char2 = str2[n];
-        }
-        else if (n > min_len && min_len == str1.size())
-        {
-            char1 = "";
-            char2 = str2[n];
-        }
-        else if (n > min_len && min_len == str2.size())
-        {
-            char1 = str1[n];
-            char2 = "";
-        }
-
-        if (char1.size() > 0 && (std::isspace(char1[0]) || std::iscntrl(char1[0]))) char1 = "--";
-        if (char2.size() > 0 && (std::isspace(char2[0]) || std::iscntrl(char2[0]))) char2 = "--";
-
-        std::cout << std::right << std::setw(2) << str1[n];
-        std::cout << " " << std::right << std::setw(2) << str2[n] << '\n'; 
-    }
-}
 
 
 TEST_LIST = {
@@ -640,6 +535,26 @@ void test_format_mixfloat()
 }
 
 
+bool compare_strings(char const* str1, char const* str2)
+{
+    char nstr1[MAXLEN];
+    trim_lb(str1, nstr1);
+    char nstr2[MAXLEN];
+    trim_lb(str2, nstr2);
+
+    return strcmp(nstr1, nstr2) == 0;
+}
+
+
+bool compare_strings(std::string str1, std::string str2)
+{
+    std::string nstr1 = trim_lb(str1);
+    std::string nstr2 = trim_lb(str2);
+    return nstr1 == nstr2;
+}
+
+
+
 void trim_lb(char const* source, char* dest)
 {
     size_t len = strlen(source);
@@ -716,3 +631,4 @@ void zerostr(char* str)
     }
     str[len-1] = '\0';
 }
+
