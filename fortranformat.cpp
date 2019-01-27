@@ -81,6 +81,8 @@ void format_e(char*, double const, size_t const, size_t const,
         char const expchar = 'E', 
         size_t const exponent_width = DEFAULT_EXPONENT,
         bool const plus_sign = false);
+double fabs(double const value);
+bool is_negative(double const value);
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
@@ -604,7 +606,7 @@ void format_i(char* put, int const value, size_t const width, size_t const fill,
 
     size_t len = integer_str_length(absvalue);
 
-    bool require_sign = value < 0 || plus_sign;
+    bool require_sign = is_negative(value) || plus_sign;
     bool fill_chars   = len < fill;
 
     size_t maxlen = len + require_sign + fill_chars*(fill - len);
@@ -626,7 +628,7 @@ void format_i(char* put, int const value, size_t const width, size_t const fill,
         // minus sign
         if (require_sign)
         {
-            if (value < 0)
+            if (is_negative(value))
             {
                 put[pos] = '-'; 
             }
@@ -667,7 +669,7 @@ void format_i(char* put, int const value, size_t const width, size_t const fill,
 void format_f(char* put, double const value, size_t const width, 
     size_t const precision, bool const plus_sign)
 {
-    bool require_sign = value < 0 || plus_sign;
+    bool require_sign = is_negative(value) || plus_sign;
 
     // integer part
     int intval = abs(static_cast<int>(value));
@@ -699,8 +701,48 @@ void format_f(char* put, double const value, size_t const width,
     {
         // an integer with a following dot
         int rounded_intval = static_cast<int>(round(value));
-        format_i(put, rounded_intval, width - 1, 0, plus_sign);
-        put[width - 1] = '.';
+        if (rounded_intval == 0 && is_negative(value))
+        {
+            // handles the weird case where value = -0.0 and its int cast
+            // is positive 0.
+            if (width >= 3)
+            {              
+                size_t pos = 0;
+                size_t len = 2 + require_sign + precision;
+                // right-alignment whitespace
+                if (width > len)
+                {
+                    for (;pos < width - len; ++pos)
+                    {
+                        put[pos] = ' ';
+                    } 
+                }
+                // minus or plus sign
+                if (require_sign)
+                {
+                    if (is_negative(value))
+                    {
+                        put[pos] = '-'; 
+                    }
+                    else
+                    {
+                        put[pos] = '+';
+                    }
+                    pos = pos + 1;
+                }
+                put[pos] = '0';
+                put[width - 1] = '.'; 
+            }
+            else
+            {
+                fill_with_char(put, '*', width);
+            }
+        }
+        else
+        {
+            format_i(put, rounded_intval, width - 1, 0, plus_sign);
+            put[width - 1] = '.';
+        }
     }
     else
     {
@@ -726,7 +768,7 @@ void format_f(char* put, double const value, size_t const width,
         // minus sign
         if (require_sign)
         {
-            if (value < 0)
+            if (is_negative(value))
             {
                 put[pos] = '-'; 
             }
@@ -772,7 +814,7 @@ void format_e(char* put, double const value, size_t const width,
     assert(exponent_width > 0);
 
     double absvalue = fabs(value);
-    bool require_sign = value < 0 || plus_sign;
+    bool require_sign = is_negative(value) || plus_sign;
 
     // minimum length without leading zero
     // . precision D+00, ., D, and + = 3
@@ -834,7 +876,7 @@ void format_e(char* put, double const value, size_t const width,
         // minus sign
         if (require_sign)
         {
-            if (value < 0)
+            if (is_negative(value))
             {
                 put[pos] = '-'; 
             }
@@ -1058,13 +1100,19 @@ void extract_fractional_part(char* put, double const value, size_t const precisi
 
 inline double fabs(double const value)
 {
-    if (value < 0.0)
+    if (is_negative(value))
     {
         return -value;
     }
     return value;
 }
 
+
+inline bool is_negative(double const value)
+{
+    // a function that handles 0.0 and -0.0 (the test -0.0 < 0.0 fails)
+    return std::signbit(value);
+}
 
 //
 // Scanner functions

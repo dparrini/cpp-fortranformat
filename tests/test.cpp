@@ -550,6 +550,11 @@ void test_format_float()
     std::cout << "  |" << cs << '\n';
     zerostr(cs);
 
+    format_f(cs, -0.0, 5, 1, false);
+    TEST_CHECK(compare_strings(cs, " -0.0"));
+    std::cout << "  |" << cs << '\n';
+    zerostr(cs);
+
     format_f(cs, -0.45, width-1, 3, false);
     TEST_CHECK(compare_strings(cs, "****"));
     zerostr(cs);

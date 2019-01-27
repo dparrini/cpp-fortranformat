@@ -77,6 +77,8 @@ void format_e(char*, double const, size_t const, size_t const,
         char const expchar = 'E', 
         size_t const exponent_width = 2,
         bool const plus_sign = false);
+double fabs(double const value);
+bool is_negative(double const value);
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
