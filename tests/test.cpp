@@ -575,6 +575,7 @@ void test_format_float()
 
 void test_format_mixfloat()
 {
+    std::ostringstream ss; 
     // for c string functions
     char cs[MAXLEN];
     zerostr(cs);
@@ -619,6 +620,11 @@ void test_format_mixfloat()
     format_g(cs, -1500., 11, 5, EXPONENT, false);
     TEST_CHECK(compare_strings(cs, "-1500.0    "));
     zerostr(cs);
+
+    // exponents different from 2
+    printfor(ss, "(2G10.3E3, D10.4)", 1.0, 2.0, 1.34567);
+    TEST_CHECK(compare_strings(ss.str().c_str(), " 1.00      2.00     0.1346D+01"));
+    ss.str(std::string()); 
 }
 
 

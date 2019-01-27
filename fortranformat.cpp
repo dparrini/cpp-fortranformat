@@ -880,7 +880,7 @@ void format_g(char* put, double const value, size_t const width,
     }
     else
     {
-        if (width > 4)
+        if (width > 2 + exponent)
         {
             // first, check range
             size_t d;
@@ -898,7 +898,7 @@ void format_g(char* put, double const value, size_t const width,
             }
 
             // format as Fw.d (no exponential part)
-            size_t w = width - 4;
+            size_t w = width - (2 + exponent);
             format_f(put, value, w, precision - d, plus_sign);  
 
             // complete remaining blank spaces
@@ -913,7 +913,6 @@ void format_g(char* put, double const value, size_t const width,
             fill_with_char(put, '*', width);
             put[width] = '\0';
         }
-        
     }
 }
 
