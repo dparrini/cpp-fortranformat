@@ -52,12 +52,17 @@ struct Scanner {
 void stream_printfor(ostream&, char const* const, va_list*);
 
 
-void write_group(ostream&, Scanner*, va_list*);
-void write_i(ostream&, Scanner*, va_list*, size_t const repeat = 1);
-void write_f(ostream&, Scanner*, va_list*, size_t const repeat = 1);
-void write_d(ostream&, Scanner*, va_list*, size_t const repeat = 1);
-void write_e(ostream&, Scanner*, va_list*, size_t const repeat = 1);
-void write_g(ostream&, Scanner*, va_list*, size_t const repeat = 1);
+void write_group(ostream&, Scanner*, va_list*, bool const );
+void write_i(ostream&, Scanner*, va_list*, size_t const repeat = 1,
+        bool const plus_sign = false);
+void write_f(ostream&, Scanner*, va_list*, size_t const repeat = 1,
+        bool const plus_sign = false);
+void write_d(ostream&, Scanner*, va_list*, size_t const repeat = 1,
+        bool const plus_sign = false);
+void write_e(ostream&, Scanner*, va_list*, size_t const repeat = 1,
+        bool const plus_sign = false);
+void write_g(ostream&, Scanner*, va_list*, size_t const repeat = 1,
+        bool const plus_sign = false);
 void write_l(ostream&, Scanner*, va_list*, size_t const repeat = 1);
 void write_a(ostream&, Scanner*, va_list*, size_t const repeat = 1);
 
@@ -67,12 +72,15 @@ void write_nl(ostream&, Scanner*);
 void write_h(ostream&, Scanner*, size_t const);
 
 void fill_with_char(char*, char const, size_t const);
-void format_i(char*, int const, size_t const, size_t const);
-void format_f(char*, double const, size_t const, size_t const);
-void format_g(char*, double const, size_t const, size_t const, size_t const);
+bool format_sign(Scanner*, bool const);
+void format_i(char*, int const, size_t const, size_t const, bool const);
+void format_f(char*, double const, size_t const, size_t const, bool const);
+void format_g(char*, double const, size_t const, size_t const, size_t const, 
+    bool const);
 void format_e(char*, double const, size_t const, size_t const, 
         char const expchar = 'E', 
-        size_t const exponent_width = DEFAULT_EXPONENT);
+        size_t const exponent_width = DEFAULT_EXPONENT,
+        bool const plus_sign = false);
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
@@ -114,22 +122,28 @@ void printfor(ostream& stream, char const* formatstr, ...)
 
 void stream_printfor(ostream& stream, char const* const formatstr, va_list* ap)
 {
+    bool const OPTIONAL_PLUS_SIGN = false;
+
     Scanner scanner(formatstr);
     skip_whitespace(&scanner);
     char c = advance(&scanner);
     if ('(' == c)
     {
-        write_group(stream, &scanner, ap);
+        write_group(stream, &scanner, ap, OPTIONAL_PLUS_SIGN);
     }
     stream << '\n';
 }
 
 
-void write_group(ostream& stream, Scanner* scanner, va_list* ap)
+void write_group(ostream& stream, Scanner* scanner, va_list* ap, 
+    bool const plus_sign)
 {
     // consume open paren and following whitespace
     skip_whitespace(scanner);
     consume(scanner);
+
+    // force optional plus sign for I, F, D, E, G descriptors
+    bool opt_plus_sign = plus_sign;
 
     for (;;)
     {
@@ -154,7 +168,7 @@ void write_group(ostream& stream, Scanner* scanner, va_list* ap)
             {
                 scanner->start = previous;
                 scanner->current = previous;
-                write_group(stream, scanner, ap);    
+                write_group(stream, scanner, ap, opt_plus_sign);    
             }
         }
         // edit descriptors
@@ -162,40 +176,44 @@ void write_group(ostream& stream, Scanner* scanner, va_list* ap)
         {
             switch(c)
             {
-                case 'I':
-                    write_i(stream, scanner, ap, repeat); 
-                break;
-
-                case 'F':
-                    write_f(stream, scanner, ap, repeat); 
+                case 'A':
+                    write_a(stream, scanner, ap, repeat); 
                 break;
 
                 case 'D':
-                    write_d(stream, scanner, ap, repeat); 
+                    write_d(stream, scanner, ap, repeat, opt_plus_sign); 
                 break;
 
                 case 'E':
-                    write_e(stream, scanner, ap, repeat); 
+                    write_e(stream, scanner, ap, repeat, opt_plus_sign); 
+                break;
+
+                case 'F':
+                    write_f(stream, scanner, ap, repeat, opt_plus_sign); 
                 break;
 
                 case 'G':
-                    write_g(stream, scanner, ap, repeat); 
+                    write_g(stream, scanner, ap, repeat, opt_plus_sign); 
+                break;
+
+                case 'H':
+                    write_h(stream, scanner, repeat); 
+                break;
+
+                case 'I':
+                    write_i(stream, scanner, ap, repeat, opt_plus_sign); 
                 break;
 
                 case 'L':
                     write_l(stream, scanner, ap, repeat); 
                 break;
 
-                case 'A':
-                    write_a(stream, scanner, ap, repeat); 
+                case 'S':
+                    opt_plus_sign = format_sign(scanner, opt_plus_sign); 
                 break;
 
                 case 'X':
                     write_x(stream, scanner, repeat); 
-                break;
-
-                case 'H':
-                    write_h(stream, scanner, repeat); 
                 break;
             }
         }
@@ -237,7 +255,7 @@ void write_group(ostream& stream, Scanner* scanner, va_list* ap)
 //
 
 void write_i(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat)
+    size_t const repeat, bool const plus_sign)
 {
     consume(scanner);
 
@@ -257,14 +275,14 @@ void write_i(ostream& stream, Scanner* scanner, va_list* ap,
         int value = va_arg(*ap, int); 
         char put[MAX_STR_LEN];
 
-        format_i(put, value, width, fill);
+        format_i(put, value, width, fill, plus_sign);
         stream << put;
     }
 }
 
 
 void write_f(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat)
+    size_t const repeat, bool const plus_sign)
 {
     consume(scanner);
 
@@ -282,7 +300,8 @@ void write_f(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_f(put, value, width, fractional);  
+        // TODO: refactor, remove std calls
+        format_f(put, value, width, fractional, plus_sign);  
         std::ios_base::fmtflags f(stream.flags());
         stream << std::setw(width) << std::right << put;
         stream.flags(f);  
@@ -291,7 +310,7 @@ void write_f(ostream& stream, Scanner* scanner, va_list* ap,
 
 
 void write_d(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat)
+    size_t const repeat, bool const plus_sign)
 {
     // TODO: similar to write_e
     consume(scanner);
@@ -310,14 +329,15 @@ void write_d(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_e(put, value, width, fractional, 'D', DEFAULT_EXPONENT);  
+        format_e(put, value, width, fractional, 'D', DEFAULT_EXPONENT, 
+            plus_sign);  
         stream << put;
     }
 }
 
 
 void write_e(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat)
+    size_t const repeat, bool const plus_sign)
 {
     // TODO: similar to write_d
     consume(scanner);
@@ -344,14 +364,14 @@ void write_e(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_e(put, value, width, fractional, 'E', exponent);  
+        format_e(put, value, width, fractional, 'E', exponent, plus_sign);  
         stream << put;
     }
 }
 
 
 void write_g(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat)
+    size_t const repeat, bool const plus_sign)
 {
     // TODO: similar to write_d and write_e
     consume(scanner);
@@ -378,7 +398,7 @@ void write_g(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_g(put, value, width, fractional, exponent);  
+        format_g(put, value, width, fractional, exponent, plus_sign);  
         stream << put;
     }
 }
@@ -549,13 +569,39 @@ void fill_with_char(char* put, char const fill, size_t const width)
     }
 }
 
-void format_i(char* put, int const value, size_t const width, size_t const fill)
+
+bool format_sign(Scanner* scanner, bool const opt_plus_sign)
+{
+    bool plus_sign = opt_plus_sign;
+    // consume the first S
+    consume(scanner);
+
+    if (peek(scanner) == 'P')
+    {
+        plus_sign = true;
+    }
+    // TODO: test for whitespace/delimiter (matching only the first S)
+    else if (peek(scanner) == 'S')
+    {
+        plus_sign = false; 
+    }
+
+    advance(scanner);
+    consume(scanner);
+
+    return plus_sign;
+}
+
+
+
+void format_i(char* put, int const value, size_t const width, size_t const fill,
+    bool const plus_sign)
 {
     unsigned int absvalue = abs(value);
 
     size_t len = integer_str_length(absvalue);
 
-    bool require_sign = value < 0;
+    bool require_sign = value < 0 || plus_sign;
     bool fill_chars   = len < fill;
 
     size_t maxlen = len + require_sign + fill_chars*(fill - len);
@@ -577,7 +623,15 @@ void format_i(char* put, int const value, size_t const width, size_t const fill)
         // minus sign
         if (require_sign)
         {
-            put[pos] = '-';
+            if (value < 0)
+            {
+                put[pos] = '-'; 
+            }
+            else
+            {
+                put[pos] = '+';   
+            }
+            
             pos = pos + 1;
         }
 
@@ -608,7 +662,7 @@ void format_i(char* put, int const value, size_t const width, size_t const fill)
 
 
 void format_f(char* put, double const value, size_t const width, 
-    size_t const precision)
+    size_t const precision, bool const plus_sign)
 {
     bool require_sign = value < 0;
 
@@ -642,7 +696,7 @@ void format_f(char* put, double const value, size_t const width,
     {
         // an integer with a following dot
         int rounded_intval = static_cast<int>(round(value));
-        format_i(put, rounded_intval, width - 1, 0);
+        format_i(put, rounded_intval, width - 1, 0, plus_sign);
         put[width - 1] = '.';
     }
     else
@@ -701,7 +755,8 @@ void format_f(char* put, double const value, size_t const width,
 
 
 void format_e(char* put, double const value, size_t const width, 
-    size_t const precision, char const expchar, size_t const exponent_width)
+    size_t const precision, char const expchar, size_t const exponent_width,
+    bool const plus_sign)
 {
     assert(exponent_width > 0);
 
@@ -782,7 +837,7 @@ void format_e(char* put, double const value, size_t const width,
         pos = pos + 1;
 
         // number value
-        format_i(put + pos, intval, precision, 0);
+        format_i(put + pos, intval, precision, 0, false);
         pos = pos + precision;
 
         // exponent sign
@@ -799,7 +854,7 @@ void format_e(char* put, double const value, size_t const width,
         pos = pos + 1;
 
         // exponent value
-        format_i(put + pos, abs(exponent), exponent_width, exponent_width);
+        format_i(put + pos, abs(exponent), exponent_width, exponent_width, false);
         pos = pos + exponent_width;
     }
     put[pos] = '\0';
@@ -807,7 +862,7 @@ void format_e(char* put, double const value, size_t const width,
 
 
 void format_g(char* put, double const value, size_t const width, 
-    size_t const precision, size_t const exponent)
+    size_t const precision, size_t const exponent, bool const plus_sign)
 {
     assert(exponent > 0);
 
@@ -818,7 +873,7 @@ void format_g(char* put, double const value, size_t const width,
     if (MIN > absvalue || absvalue >= MAX)
     {
         // format as Ew.dEe
-        format_e(put, value, width, precision, 'E', exponent);
+        format_e(put, value, width, precision, 'E', exponent, plus_sign);
     }
     else
     {
@@ -841,7 +896,7 @@ void format_g(char* put, double const value, size_t const width,
 
             // format as Fw.d (no exponential part)
             size_t w = width - 4;
-            format_f(put, value, w, precision - d);  
+            format_f(put, value, w, precision - d, plus_sign);  
 
             // complete remaining blank spaces
             for (size_t white = w; white < width; ++white)

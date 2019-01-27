@@ -16,6 +16,7 @@ void test_repeat();
 void test_string();
 void test_combined();
 void test_nonrepeat();
+void test_plus_sign();
 void test_format_float();
 void test_format_mixfloat();
 
@@ -147,6 +148,7 @@ TEST_LIST = {
     { "repeat", test_repeat },
     { "combined", test_combined },
     { "format_nonrepeat", test_nonrepeat },
+    { "format_plus_sign", test_plus_sign },
     { "format_float", test_format_float },
     { "format_mixfloat", test_format_mixfloat },
     {0}
@@ -164,32 +166,32 @@ void test_basic()
 
     std::cout << "  |Number printing:" << '\n';
 
-    format_i(cs, 10, 3, 3); // 010
+    format_i(cs, 10, 3, 3, false); // 010
     std::cout << "  |" << cs << '\n';
 
-    format_i(cs, -10, 3, 3); // ***
+    format_i(cs, -10, 3, 3, false); // ***
     std::cout << "  |" << cs << '\n';
 
-    format_i(cs, -1, 4, 3); // -001
+    format_i(cs, -1, 4, 3, false); // -001
     std::cout << "  |" << cs << '\n';
 
-    format_i(cs, -1, 7, 3); // ___-001
+    format_i(cs, -1, 7, 3, false); // ___-001
     std::cout << "  |" << cs << '\n';
 
-    format_e(cs, 1234.678, 9, 3); // 0.123D+04
+    format_e(cs, 1234.678, 9, 3, false); // 0.123D+04
     std::cout << "  |" << cs << '\n';
 
-    format_e(cs, 1234.678, 8, 4); // ********
+    format_e(cs, 1234.678, 8, 4, false); // ********
     std::cout << "  |" << cs << '\n';
-    format_e(cs, 1234.678, 13, 4); // ___0.1235D+04
+    format_e(cs, 1234.678, 13, 4, false); // ___0.1235D+04
     std::cout << "  |" << cs << '\n';
-    format_e(cs, -1234.678, 13, 4); // __-0.1235D+04
-    std::cout << "  |" << cs << '\n';
-
-    format_e(cs, -1234.678, 13, 5); // __-0.1235D+04
+    format_e(cs, -1234.678, 13, 4, false); // __-0.1235D+04
     std::cout << "  |" << cs << '\n';
 
-    format_e(cs, -1234.678, 13, 5, 'E', 3); // -0.12347E+004
+    format_e(cs, -1234.678, 13, 5, false); // __-0.1235D+04
+    std::cout << "  |" << cs << '\n';
+
+    format_e(cs, -1234.678, 13, 5, 'E', 3, false); // -0.12347E+004
     std::cout << "  |" << cs << '\n';
 
 
@@ -272,23 +274,23 @@ void test_integer()
     char cs[MAXLEN];
     zerostr(cs);
 
-    format_i(cs, 5000, 3, 0);
+    format_i(cs, 5000, 3, 0, false);
     TEST_CHECK(compare_strings(cs, "***"));
     zerostr(cs);
 
-    format_i(cs, 5000, 5, 0);
+    format_i(cs, 5000, 5, 0, false);
     TEST_CHECK(compare_strings(cs, " 5000"));
     zerostr(cs);
 
-    format_i(cs, 23, 5, 0);
+    format_i(cs, 23, 5, 0, false);
     TEST_CHECK(compare_strings(cs, "   23"));
     zerostr(cs);
 
-    format_i(cs, 23, 5, 3);
+    format_i(cs, 23, 5, 3, false);
     TEST_CHECK(compare_strings(cs, "  023"));
     zerostr(cs);
 
-    format_i(cs, -23, 5, 3);
+    format_i(cs, -23, 5, 3, false);
     TEST_CHECK(compare_strings(cs, " -023"));
     zerostr(cs);
 }
@@ -463,6 +465,33 @@ void test_nonrepeat()
 }
 
 
+void test_plus_sign()
+{
+    std::cout << '\n';
+    std::ostringstream ss; 
+
+    printfor(ss, "(SP, I5)", 10);
+    TEST_CHECK(compare_strings(ss.str().c_str(), "  +10"));
+    std::cout << ss.str() << std::endl;
+    ss.str(std::string());
+
+    printfor(ss, "(SP, SS, I5)", 10);
+    TEST_CHECK(compare_strings(ss.str().c_str(), "   10"));
+    std::cout << ss.str() << std::endl;
+    ss.str(std::string());
+
+    printfor(ss, "(SP, I5, SS, I4.3)", 10, 3);
+    TEST_CHECK(compare_strings(ss.str().c_str(), "  +10 003"));
+    std::cout << ss.str() << std::endl;
+    ss.str(std::string());  
+
+    printfor(ss, "(SP, I10.8, I10, SS, I5)", 100, 250, 13);
+    TEST_CHECK(compare_strings(ss.str().c_str(), " +00000100      +250   13"));
+    std::cout << ss.str() << std::endl;
+    ss.str(std::string());  
+}
+
+
 void test_format_float()
 {
     // for c string functions
@@ -474,71 +503,71 @@ void test_format_float()
 
     std::cout << '\n' << "  |Number printing:" << '\n';
 
-    format_f(cs, 0.0, 1, 0);
+    format_f(cs, 0.0, 1, 0, false);
     TEST_CHECK(compare_strings(cs, "*"));
     zerostr(cs);
 
-    format_f(cs, 0.45, width, 3);
+    format_f(cs, 0.45, width, 3, false);
     TEST_CHECK(compare_strings(cs, "0.450"));
     std::cout << "  |" << cs << '\n';
     zerostr(cs);
 
-    format_f(cs, 11.3, width, 3);
+    format_f(cs, 11.3, width, 3, false);
     TEST_CHECK(compare_strings(cs, "*****"));
     zerostr(cs);
 
-    format_f(cs, 100.7003, width, 1);
+    format_f(cs, 100.7003, width, 1, false);
     TEST_CHECK(compare_strings(cs, "100.7"));
     zerostr(cs);
 
-    format_f(cs, 0.0235, width, 4);
+    format_f(cs, 0.0235, width, 4, false);
     TEST_CHECK(compare_strings(cs, ".0235"));
     zerostr(cs);
 
-    format_f(cs, 100000003.0004, 10, 0);
+    format_f(cs, 100000003.0004, 10, 0, false);
     TEST_CHECK(compare_strings(cs, "100000003."));
     zerostr(cs);
 
     // write
-    format_f(cs, -0.0, 1, 0);
+    format_f(cs, -0.0, 1, 0, false);
     TEST_CHECK(compare_strings(cs, "*"));
     zerostr(cs);
 
-    format_f(cs, -0.0, 2, 0);
+    format_f(cs, -0.0, 2, 0, false);
     TEST_CHECK(compare_strings(cs, "**"));
     std::cout << "  |" << cs << '\n';
     zerostr(cs);
 
-    format_f(cs, -0.0, 3, 0);
+    format_f(cs, -0.0, 3, 0, false);
     TEST_CHECK(compare_strings(cs, "-0."));
     std::cout << "  |" << cs << '\n';
     zerostr(cs);
 
-    format_f(cs, -0.45, width-1, 3);
+    format_f(cs, -0.45, width-1, 3, false);
     TEST_CHECK(compare_strings(cs, "****"));
     zerostr(cs);
 
-    format_f(cs, -0.45, width, 3);
+    format_f(cs, -0.45, width, 3, false);
     TEST_CHECK(compare_strings(cs, "-.450"));
     zerostr(cs);
 
-    format_f(cs, -0.45, width+1, 3);
+    format_f(cs, -0.45, width+1, 3, false);
     TEST_CHECK(compare_strings(cs, "-0.450"));
     zerostr(cs);
 
-    format_f(cs, -11.3, width+1, 3);
+    format_f(cs, -11.3, width+1, 3, false);
     TEST_CHECK(compare_strings(cs, "******"));
     zerostr(cs);
 
-    format_f(cs, -100.7003, width+1, 1);
+    format_f(cs, -100.7003, width+1, 1, false);
     TEST_CHECK(compare_strings(cs, "-100.7"));
     zerostr(cs);
 
-    format_f(cs, -0.0235, width+1, 4);
+    format_f(cs, -0.0235, width+1, 4, false);
     TEST_CHECK(compare_strings(cs, "-.0235"));
     zerostr(cs);
 
-    format_f(cs, -100000003.0004, 11, 0);
+    format_f(cs, -100000003.0004, 11, 0, false);
     TEST_CHECK(compare_strings(cs, "-100000003."));
     zerostr(cs);
 }
@@ -553,41 +582,41 @@ void test_format_mixfloat()
     size_t const EXPONENT = 2;
 
     // below 0.1 and without space
-    format_g(cs, 0.01, 4, 3, EXPONENT);
+    format_g(cs, 0.01, 4, 3, EXPONENT, false);
     TEST_CHECK(compare_strings(cs, "****"));
     zerostr(cs);
 
     // below 0.1 and without space
-    format_g(cs, 0.01, 8, 3, EXPONENT);
+    format_g(cs, 0.01, 8, 3, EXPONENT, false);
     TEST_CHECK(compare_strings(cs, ".100E-01"));
     zerostr(cs);
 
     // above 10**d
-    format_g(cs, 1500., 8, 3, EXPONENT);
+    format_g(cs, 1500., 8, 3, EXPONENT, false);
     TEST_CHECK(compare_strings(cs, ".150E+04"));
     zerostr(cs);
 
     // above 10**d
-    format_g(cs, 1500., 9, 3, 3);
+    format_g(cs, 1500., 9, 3, 3, false);
     TEST_CHECK(compare_strings(cs, ".150E+004"));
     zerostr(cs);
 
     // several cases between 0.1 and 10**d
-    format_g(cs, 1500., 9, 4, EXPONENT);
+    format_g(cs, 1500., 9, 4, EXPONENT, false);
     TEST_CHECK(compare_strings(cs, "1500.    "));
     zerostr(cs);
 
     // several cases between 0.1 and 10**d
-    format_g(cs, 1500., 10, 4, EXPONENT);
+    format_g(cs, 1500., 10, 4, EXPONENT, false);
     TEST_CHECK(compare_strings(cs, " 1500.    "));
     zerostr(cs);
 
     // several cases between 0.1 and 10**d
-    format_g(cs, 1500., 11, 4, EXPONENT);
+    format_g(cs, 1500., 11, 4, EXPONENT, false);
     TEST_CHECK(compare_strings(cs, "  1500.    "));
     zerostr(cs);
 
-    format_g(cs, -1500., 11, 5, EXPONENT);
+    format_g(cs, -1500., 11, 5, EXPONENT, false);
     TEST_CHECK(compare_strings(cs, "-1500.0    "));
     zerostr(cs);
 }

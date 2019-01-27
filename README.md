@@ -94,8 +94,8 @@ output is basic and don't reflect expected Fortran's.
 | /                    |    Yes     | Both       |
 | :                    |    No      | Both       |
 | S                    |    No      | Output     |
-| SP                   |    No      | Output     |
-| SS                   |    No      | Output     |
+| SP                   |    Partial | Output     |
+| SS                   |    Partial | Output     |
 | kP                   |    No      | Both       |
 | BN                   |    No      | Input      |
 | BZ                   |    No      | Input      |
@@ -105,8 +105,8 @@ output is basic and don't reflect expected Fortran's.
 
 - There is no check against malformed format string
 - Does not handle `-0.0` as expected.
-- Doesn't support escaping quotes by repeating it, such as `''` or `""`, within `nH`.
-- Doesn't escape single quotation marks `'` within double quotation marks strings and vice-versa.
+- Does not support escaping quotes by repeating it, such as `''` or `""`, within `nH`.
+- Does not escape single quotation marks `'` within double quotation marks strings and vice-versa.
 - No error is thrown when `w=0`.
 - No default values for omitted `w` and `d`.
 
