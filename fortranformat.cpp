@@ -52,7 +52,7 @@ struct Scanner {
 void stream_printfor(ostream&, char const* const, va_list*);
 
 
-void write_group(ostream&, Scanner*, va_list*, bool const );
+bool write_group(ostream&, Scanner*, va_list*, bool const );
 void write_i(ostream&, Scanner*, va_list*, size_t const repeat = 1,
         bool const plus_sign = false);
 void write_f(ostream&, Scanner*, va_list*, size_t const repeat = 1,
@@ -135,7 +135,7 @@ void stream_printfor(ostream& stream, char const* const formatstr, va_list* ap)
 }
 
 
-void write_group(ostream& stream, Scanner* scanner, va_list* ap, 
+bool write_group(ostream& stream, Scanner* scanner, va_list* ap, 
     bool const plus_sign)
 {
     // consume open paren and following whitespace
@@ -168,7 +168,7 @@ void write_group(ostream& stream, Scanner* scanner, va_list* ap,
             {
                 scanner->start = previous;
                 scanner->current = previous;
-                write_group(stream, scanner, ap, opt_plus_sign);    
+                opt_plus_sign = write_group(stream, scanner, ap, opt_plus_sign);    
             }
         }
         // edit descriptors
@@ -247,6 +247,9 @@ void write_group(ostream& stream, Scanner* scanner, va_list* ap,
         skip_whitespace(scanner);
         consume(scanner);
     }
+
+    // spill group options
+    return opt_plus_sign;
 }
 
 

@@ -48,7 +48,7 @@ struct Scanner {
 void stream_printfor(ostream&, char const* const, va_list*);
 
 
-void write_group(ostream&, Scanner*, va_list*, bool const);
+bool write_group(ostream&, Scanner*, va_list*, bool const);
 void write_i(ostream&, Scanner*, va_list*, size_t const repeat = 1,
         bool const plus_sign = false);
 void write_f(ostream&, Scanner*, va_list*, size_t const repeat = 1,
