@@ -298,7 +298,6 @@ void test_integer()
 
 void test_float()
 {
-    std::cout << '\n';
     std::ostringstream ss;
 
     printfor(ss, "(F7.3)", 3.001345);
@@ -338,7 +337,6 @@ void test_float()
 
 void test_logical()
 {
-    std::cout << '\n';
     std::ostringstream ss;
 
     printfor(ss, "(L7)", true);
@@ -353,7 +351,6 @@ void test_logical()
 
 void test_repeat()
 {
-    std::cout << '\n';
     std::ostringstream ss;
 
     printfor(ss, "(3I3)", 1, 2, 3);
@@ -374,7 +371,6 @@ void test_repeat()
 
 void test_string()
 {
-    std::cout << '\n';
     std::ostringstream ss;
 
     printfor(ss, "(A)", "test");
@@ -417,7 +413,6 @@ void test_string()
 
 void test_combined()
 {
-    std::cout << '\n';
     std::ostringstream ss;
 
     printfor(ss, "  (((  3I3  )))", 1, 2, 3);
@@ -445,7 +440,6 @@ void test_combined()
 
 void test_nonrepeat()
 {
-    std::cout << '\n';
     std::ostringstream ss;
 
     // unspecified X count and no arguments
@@ -467,51 +461,40 @@ void test_nonrepeat()
 
 void test_plus_sign()
 {
-    std::cout << '\n';
     std::ostringstream ss; 
 
     // integers
     printfor(ss, "(SP, I5)", 10);
     TEST_CHECK(compare_strings(ss.str().c_str(), "  +10"));
-    std::cout << ss.str() << std::endl;
     ss.str(std::string());
 
     printfor(ss, "(SP, SS, I5)", 10);
     TEST_CHECK(compare_strings(ss.str().c_str(), "   10"));
-    std::cout << ss.str() << std::endl;
     ss.str(std::string());
 
     printfor(ss, "(SP, I5, SS, I4.3)", 10, 3);
     TEST_CHECK(compare_strings(ss.str().c_str(), "  +10 003"));
-    std::cout << ss.str() << std::endl;
     ss.str(std::string());  
 
     printfor(ss, "(SP, I10.8, I10, SS, I5)", 100, 250, 13);
     TEST_CHECK(compare_strings(ss.str().c_str(), " +00000100      +250   13"));
-    std::cout << ss.str() << std::endl;
     ss.str(std::string());  
 
     // floating point
     printfor(ss, "(SP, F5.3, SS, F8.4)", 0.0008, 9.23);
     TEST_CHECK(compare_strings(ss.str().c_str(), "+.001  9.2300"));
-    std::cout << ss.str() << std::endl;
     ss.str(std::string());
 
     printfor(ss, "(SP, 2F6.3, SS, F8.4)", 1.0, 2.0, 1.34567);
     TEST_CHECK(compare_strings(ss.str().c_str(), "+1.000+2.000  1.3457"));
-    std::cout << ss.str() << std::endl;
     ss.str(std::string());
 
     printfor(ss, "(2(G10.3E3, SP), D10.4)", 1.0, 2.0, 1.34567);
     TEST_CHECK(compare_strings(ss.str().c_str(), " 1.00     +2.00     +.1346D+01"));
-    std::cout << ss.str() << std::endl;
-    std::cout << " 1.00     +2.00     +.1346D+01" << std::endl;
     ss.str(std::string());  
 
     printfor(ss, "(2G10.3E3, D10.4)", 1.0, 2.0, 1.34567);
     TEST_CHECK(compare_strings(ss.str().c_str(), " 1.00      2.00     0.1346D+01"));
-    std::cout << ss.str() << std::endl;
-    std::cout << " 1.00      2.00     0.1346D+01" << std::endl;
     ss.str(std::string()); 
 }
 
