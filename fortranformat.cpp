@@ -667,7 +667,7 @@ void format_i(char* put, int const value, size_t const width, size_t const fill,
 void format_f(char* put, double const value, size_t const width, 
     size_t const precision, bool const plus_sign)
 {
-    bool require_sign = value < 0;
+    bool require_sign = value < 0 || plus_sign;
 
     // integer part
     int intval = abs(static_cast<int>(value));
@@ -726,7 +726,15 @@ void format_f(char* put, double const value, size_t const width,
         // minus sign
         if (require_sign)
         {
-            put[pos] = '-';
+            if (value < 0)
+            {
+                put[pos] = '-'; 
+            }
+            else
+            {
+                put[pos] = '+';
+            }
+            
             pos = pos + 1;
         } 
 
@@ -764,7 +772,7 @@ void format_e(char* put, double const value, size_t const width,
     assert(exponent_width > 0);
 
     double absvalue = fabs(value);
-    bool require_sign = value < 0;
+    bool require_sign = value < 0 || plus_sign;
 
     // minimum length without leading zero
     // . precision D+00, ., D, and + = 3
@@ -826,7 +834,15 @@ void format_e(char* put, double const value, size_t const width,
         // minus sign
         if (require_sign)
         {
-            put[pos] = '-';
+            if (value < 0)
+            {
+                put[pos] = '-'; 
+            }
+            else
+            {
+                put[pos] = '+';
+            }
+            
             pos = pos + 1;
         }
 

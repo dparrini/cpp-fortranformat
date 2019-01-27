@@ -470,6 +470,7 @@ void test_plus_sign()
     std::cout << '\n';
     std::ostringstream ss; 
 
+    // integers
     printfor(ss, "(SP, I5)", 10);
     TEST_CHECK(compare_strings(ss.str().c_str(), "  +10"));
     std::cout << ss.str() << std::endl;
@@ -489,6 +490,29 @@ void test_plus_sign()
     TEST_CHECK(compare_strings(ss.str().c_str(), " +00000100      +250   13"));
     std::cout << ss.str() << std::endl;
     ss.str(std::string());  
+
+    // floating point
+    printfor(ss, "(SP, F5.3, SS, F8.4)", 0.0008, 9.23);
+    TEST_CHECK(compare_strings(ss.str().c_str(), "+.001  9.2300"));
+    std::cout << ss.str() << std::endl;
+    ss.str(std::string());
+
+    printfor(ss, "(SP, 2F6.3, SS, F8.4)", 1.0, 2.0, 1.34567);
+    TEST_CHECK(compare_strings(ss.str().c_str(), "+1.000+2.000  1.3457"));
+    std::cout << ss.str() << std::endl;
+    ss.str(std::string());
+
+    printfor(ss, "(2(G10.3E3, SP), D10.4)", 1.0, 2.0, 1.34567);
+    TEST_CHECK(compare_strings(ss.str().c_str(), " 1.00     +2.00     +.1346D+01"));
+    std::cout << ss.str() << std::endl;
+    std::cout << " 1.00     +2.00     +.1346D+01" << std::endl;
+    ss.str(std::string());  
+
+    printfor(ss, "(2G10.3E3, D10.4)", 1.0, 2.0, 1.34567);
+    TEST_CHECK(compare_strings(ss.str().c_str(), " 1.00      2.00     0.1346D+01"));
+    std::cout << ss.str() << std::endl;
+    std::cout << " 1.00      2.00     0.1346D+01" << std::endl;
+    ss.str(std::string()); 
 }
 
 
