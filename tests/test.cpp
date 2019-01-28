@@ -21,6 +21,7 @@ void test_format_float();
 void test_format_mixfloat();
 
 bool compare_strings(char const*, char const*);
+bool compare_strings(char const*, char const*, size_t const);
 bool compare_strings(std::string, std::string);
 
 void trim_lb(char const* source, char* dest);
@@ -128,28 +129,28 @@ void test_basic()
     TEST_CHECK(integer_str_length(100000003) == 9);
 
     // integer parts
-    extract_integer_part(cs, 0.45, false);
-    TEST_CHECK(compare_strings(cs, "0"));
+    write_integer(cs, 0.45, false, true);
+    TEST_CHECK(compare_strings(cs, "0", 1));
     zerostr(cs);
 
-    extract_integer_part(cs, 11.3, false);
-    TEST_CHECK(compare_strings(cs, "11"));
+    write_integer(cs, 11.3, false, true);
+    TEST_CHECK(compare_strings(cs, "11", 2));
     zerostr(cs);
 
-    extract_integer_part(cs, 100.7003, false);
-    TEST_CHECK(compare_strings(cs, "100"));
+    write_integer(cs, 100.7003, false, true);
+    TEST_CHECK(compare_strings(cs, "100", 3));
     zerostr(cs);
 
-    extract_integer_part(cs, 100.7003, true);
-    TEST_CHECK(compare_strings(cs, "101"));
+    write_integer(cs, 100.7003, true, true);
+    TEST_CHECK(compare_strings(cs, "101", 3));
     zerostr(cs);
 
-    extract_integer_part(cs, 1063.0, false);
-    TEST_CHECK(compare_strings(cs, "1063"));
+    write_integer(cs, 1063.0, false, true);
+    TEST_CHECK(compare_strings(cs, "1063", 4));
     zerostr(cs);
 
-    extract_integer_part(cs, 100000003.0004, false);
-    TEST_CHECK(compare_strings(cs, "100000003"));
+    write_integer(cs, 100000003.0004, false, true);
+    TEST_CHECK(compare_strings(cs, "100000003", 9));
     zerostr(cs);
 
     // fractional zeroes
@@ -543,6 +544,12 @@ bool compare_strings(char const* str1, char const* str2)
     trim_lb(str2, nstr2);
 
     return strcmp(nstr1, nstr2) == 0;
+}
+
+
+bool compare_strings(char const* str1, char const* str2, size_t const len)
+{
+    return strncmp(str1, str2, len) == 0;
 }
 
 

@@ -86,7 +86,7 @@ bool is_negative(double const value);
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
-void extract_integer_part(char*, double const, bool const);
+void write_integer(char*, double const, bool const, bool const);
 void extract_fractional_part(char*, double const, size_t const, bool const);
 
 void consume(Scanner* const);
@@ -151,14 +151,12 @@ bool write_group(ostream& stream, Scanner* scanner, va_list* ap,
     {
         char c = advance(scanner);
 
-        // stream << "scanning " << c << '\n';
-
         // repeat count
         unsigned int repeat = 1;
         if (is_digit(c))
         {
             repeat = integer(scanner);
-            // TODO: repeat must be nonzero
+            assert(repeat > 0);
             c = advance(scanner);
         }
 
@@ -305,11 +303,8 @@ void write_f(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        // TODO: refactor, remove std calls
-        format_f(put, value, width, fractional, plus_sign);  
-        std::ios_base::fmtflags f(stream.flags());
-        stream << std::setw(width) << std::right << put;
-        stream.flags(f);  
+        format_f(put, value, width, fractional, plus_sign);
+        stream << put;
     }
 }
 
@@ -650,17 +645,9 @@ void format_i(char* put, int const value, size_t const width, size_t const fill,
         }
 
         // integer
-        // TODO: can be refactored, see extract_integer_part
-        unsigned int intpart = abs(static_cast<int>(value));
-        for(size_t n = 0; n < len; ++n, ++pos)
-        {
-            size_t power = fast_10pow(len - n - 1);
-            unsigned int newvalue = static_cast<int>(intpart / power);
-
-            put[pos] = newvalue + '0';
-
-            intpart = intpart - newvalue * power;
-        }
+        bool const NOT_ROUNDED = false;
+        bool const INSERT_NUL = false;
+        write_integer(put + pos, value, NOT_ROUNDED, INSERT_NUL);
     }
     put[width] = '\0'; 
 }
@@ -674,8 +661,9 @@ void format_f(char* put, double const value, size_t const width,
     // integer part
     int intval = abs(static_cast<int>(value));
     char intstr[MAX_STR_LEN];
-    bool ROUNDED = false;
-    extract_integer_part(intstr, intval, ROUNDED);
+    bool const NOT_ROUNDED = false;
+    bool const INSERT_NUL = true;
+    write_integer(intstr, intval, NOT_ROUNDED, INSERT_NUL);
     size_t const INTLEN = strlen(intstr);
 
     // the integer part output is optional when its = 0
@@ -683,7 +671,7 @@ void format_f(char* put, double const value, size_t const width,
 
     // fractional part
     char fracstr[MAX_STR_LEN];
-    ROUNDED = true;
+    bool const ROUNDED = true;
     extract_fractional_part(fracstr, value, precision, ROUNDED);
     size_t const FRACLEN = precision;
 
@@ -843,7 +831,7 @@ void format_e(char* put, double const value, size_t const width,
             unsigned int intval = static_cast<unsigned int>(absvalue);
             exponent = integer_str_length(intval);
 
-            if (exponent >= precision)
+            if (exponent >= static_cast<int>(precision))
             {
                 power = 1.0 / static_cast<double>(fast_10pow(exponent - precision));
             }
@@ -1015,10 +1003,9 @@ size_t integer_str_length(unsigned int const value)
 }
 
 
-void extract_integer_part(char* put, double const value, 
-    bool const rounded_last_digit)
+void write_integer(char* put, double const value, 
+    bool const rounded_last_digit, bool const insert_nul)
 {
-    // TODO: can be refactored, see format_i
     double absvalue = fabs(value);
     unsigned int intpart = abs(static_cast<int>(value));
     size_t const digits = integer_str_length(abs(intpart));
@@ -1038,8 +1025,11 @@ void extract_integer_part(char* put, double const value,
         put[pos] = newvalue + '0';
 
         intpart = intpart - newvalue * power;
+    }  
+    if (insert_nul)
+    {
+        put[digits] = '\0';
     }
-    put[digits] = '\0';
 }
 
 
