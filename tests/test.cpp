@@ -33,6 +33,9 @@ size_t const MAXLEN = 200;
 
 // default exponent width
 size_t const DEFAULT_EXPONENT = 2;
+// Floating point numbers exponential part character
+char const EXPONENTIAL_D = 'D';
+char const EXPONENTIAL_E = 'E';
 
 
 TEST_LIST = {
@@ -60,34 +63,42 @@ void test_basic()
     char cs[MAXLEN];
     zerostr(cs);
 
+    bool const NO_PLUS_SIGN = false;
+
     std::cout << "  |Number printing:" << '\n';
 
-    format_i(cs, 10, 3, 3, false); // 010
+    format_i(cs, 10, 3, 3, NO_PLUS_SIGN); // 010
     std::cout << "  |" << cs << '\n';
 
-    format_i(cs, -10, 3, 3, false); // ***
+    format_i(cs, -10, 3, 3, NO_PLUS_SIGN); // ***
     std::cout << "  |" << cs << '\n';
 
-    format_i(cs, -1, 4, 3, false); // -001
+    format_i(cs, -1, 4, 3, NO_PLUS_SIGN); // -001
     std::cout << "  |" << cs << '\n';
 
-    format_i(cs, -1, 7, 3, false); // ___-001
+    format_i(cs, -1, 7, 3, NO_PLUS_SIGN); // ___-001
     std::cout << "  |" << cs << '\n';
 
-    format_e(cs, 1234.678, 9, 3, false); // 0.123D+04
+    // 0.123D+04
+    format_e(cs, 1234.678, 9, 3, EXPONENTIAL_E, DEFAULT_EXPONENT, NO_PLUS_SIGN);
     std::cout << "  |" << cs << '\n';
 
-    format_e(cs, 1234.678, 8, 4, false); // ********
+    // ********
+    format_e(cs, 1234.678, 8, 4, EXPONENTIAL_E, DEFAULT_EXPONENT, NO_PLUS_SIGN);
     std::cout << "  |" << cs << '\n';
-    format_e(cs, 1234.678, 13, 4, false); // ___0.1235D+04
+    // ___0.1235D+04
+    format_e(cs, 1234.678, 13, 4, EXPONENTIAL_E, DEFAULT_EXPONENT, NO_PLUS_SIGN);
     std::cout << "  |" << cs << '\n';
-    format_e(cs, -1234.678, 13, 4, false); // __-0.1235D+04
+    // __-0.1235D+04
+    format_e(cs, -1234.678, 13, 4, EXPONENTIAL_E, DEFAULT_EXPONENT, NO_PLUS_SIGN);
     std::cout << "  |" << cs << '\n';
 
-    format_e(cs, -1234.678, 13, 5, false); // __-0.1235D+04
+    // __-0.1235D+04
+    format_e(cs, -1234.678, 13, 5, EXPONENTIAL_E, DEFAULT_EXPONENT, NO_PLUS_SIGN);
     std::cout << "  |" << cs << '\n';
 
-    format_e(cs, -1234.678, 13, 5, 'E', 3, false); // -0.12347E+004
+    // -0.12347E+004
+    format_e(cs, -1234.678, 13, 5, EXPONENTIAL_E, 3, NO_PLUS_SIGN);
     std::cout << "  |" << cs << '\n';
 
 

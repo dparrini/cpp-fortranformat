@@ -65,20 +65,14 @@ void stream_printfor(ostream&, char const* const, va_list*);
 
 
 bool write_group(ostream&, Scanner*, va_list*, bool const );
-void write_i(ostream&, Scanner*, va_list*, size_t const repeat = 1,
-        bool const plus_sign = false);
-void write_f(ostream&, Scanner*, va_list*, size_t const repeat = 1,
-        bool const plus_sign = false);
-void write_d(ostream&, Scanner*, va_list*, size_t const repeat = 1,
-        bool const plus_sign = false);
-void write_e(ostream&, Scanner*, va_list*, size_t const repeat = 1,
-        bool const plus_sign = false);
-void write_g(ostream&, Scanner*, va_list*, size_t const repeat = 1,
-        bool const plus_sign = false);
-void write_l(ostream&, Scanner*, va_list*, size_t const repeat = 1);
-void write_a(ostream&, Scanner*, va_list*, size_t const repeat = 1);
-
-void write_x(ostream&, Scanner*, size_t const repeat = 1);
+void write_i(ostream&, Scanner*, va_list*, size_t const, bool const);
+void write_f(ostream&, Scanner*, va_list*, size_t const, bool const);
+void write_d(ostream&, Scanner*, va_list*, size_t const, bool const);
+void write_e(ostream&, Scanner*, va_list*, size_t const, bool const);
+void write_g(ostream&, Scanner*, va_list*, size_t const, bool const);
+void write_l(ostream&, Scanner*, va_list*, size_t const);
+void write_a(ostream&, Scanner*, va_list*, size_t const);
+void write_x(ostream&, Scanner*, size_t const);
 void write_str(ostream&, Scanner*, char const);
 void write_nl(ostream&, Scanner*);
 void write_h(ostream&, Scanner*, size_t const);
@@ -89,12 +83,10 @@ void format_i(char*, int const, size_t const, size_t const, bool const);
 void format_f(char*, double const, size_t const, size_t const, bool const);
 void format_g(char*, double const, size_t const, size_t const, size_t const, 
     bool const);
-void format_e(char*, double const, size_t const, size_t const, 
-        char const expchar = EXPONENTIAL_E, 
-        size_t const exponent_width = DEFAULT_EXPONENT,
-        bool const plus_sign = false);
-double fabs(double const value);
-bool is_negative(double const value);
+void format_e(char*, double const, size_t const, size_t const, char const, 
+    size_t const, bool const);
+double fabs(double const);
+bool is_negative(double const);
 size_t fast_10pow(size_t const);
 size_t integer_str_length(unsigned int const);
 size_t frac_zeroes(double const);
