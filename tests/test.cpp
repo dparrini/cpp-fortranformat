@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <fortranformat.hpp>
 #include "fortranformat_tests.hpp"
 #include "acutest.h"
 
