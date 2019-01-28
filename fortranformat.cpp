@@ -1186,8 +1186,6 @@ bool is_at_end(Scanner const* const scanner)
     switch (scanner->current[0])
     {
         case '\0':  // c null terminator character
-        case '/':  // colon edit descriptor
-        // case ':':  // slash edit descriptor
             return true;
         default:
             return false;
