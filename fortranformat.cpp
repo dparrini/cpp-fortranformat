@@ -31,10 +31,22 @@
 #include "fortranformat.hpp"
 using std::ostream;
 
+// default buffer size
 size_t const MAX_STR_LEN = 200;
 
 // default exponent width
 size_t const DEFAULT_EXPONENT = 2;
+
+// Fortran's output for true/false values
+char const FORTRAN_TRUE  = 'T';
+char const FORTRAN_FALSE = 'F';
+
+// Floating point numbers exponential part character
+char const EXPONENTIAL_D = 'D';
+char const EXPONENTIAL_E = 'E';
+
+// character to fill when the number width overflows specified width
+char const OVERFLOW_FILL_CHAR = '*';
 
 #ifndef DEBUG
 
@@ -78,7 +90,7 @@ void format_f(char*, double const, size_t const, size_t const, bool const);
 void format_g(char*, double const, size_t const, size_t const, size_t const, 
     bool const);
 void format_e(char*, double const, size_t const, size_t const, 
-        char const expchar = 'E', 
+        char const expchar = EXPONENTIAL_E, 
         size_t const exponent_width = DEFAULT_EXPONENT,
         bool const plus_sign = false);
 double fabs(double const value);
@@ -263,6 +275,7 @@ void write_i(ostream& stream, Scanner* scanner, va_list* ap,
     consume(scanner);
 
     int width = integer(scanner);
+    assert(width > 0);
     int fill = 0;
     
     if (peek(scanner) == '.')
@@ -290,6 +303,7 @@ void write_f(ostream& stream, Scanner* scanner, va_list* ap,
     consume(scanner);
 
     int width = integer(scanner);
+    assert(width > 0);
     int fractional = 0;
 
     // dot character
@@ -316,6 +330,7 @@ void write_d(ostream& stream, Scanner* scanner, va_list* ap,
     consume(scanner);
 
     int width = integer(scanner);
+    assert(width > 0);
     int fractional = 0;
 
     // dot character
@@ -329,7 +344,7 @@ void write_d(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_e(put, value, width, fractional, 'D', DEFAULT_EXPONENT, 
+        format_e(put, value, width, fractional, EXPONENTIAL_D, DEFAULT_EXPONENT, 
             plus_sign);  
         stream << put;
     }
@@ -343,6 +358,7 @@ void write_e(ostream& stream, Scanner* scanner, va_list* ap,
     consume(scanner);
 
     int width = integer(scanner);
+    assert(width > 0);
     int fractional = 0;
 
     // dot character
@@ -364,7 +380,8 @@ void write_e(ostream& stream, Scanner* scanner, va_list* ap,
         double value = va_arg(*ap, double); 
         char put[MAX_STR_LEN];
 
-        format_e(put, value, width, fractional, 'E', exponent, plus_sign);  
+        format_e(put, value, width, fractional, EXPONENTIAL_E, exponent, 
+            plus_sign);  
         stream << put;
     }
 }
@@ -377,6 +394,7 @@ void write_g(ostream& stream, Scanner* scanner, va_list* ap,
     consume(scanner);
 
     int width = integer(scanner);
+    assert(width > 0);
     int fractional = 0;
 
     // dot character
@@ -385,7 +403,7 @@ void write_g(ostream& stream, Scanner* scanner, va_list* ap,
     fractional = integer(scanner);
 
     size_t exponent = DEFAULT_EXPONENT;
-    if (peek(scanner) == 'E')
+    if (peek(scanner) == EXPONENTIAL_E)
     {
         advance(scanner); 
         consume(scanner);
@@ -409,6 +427,7 @@ void write_l(ostream& stream, Scanner* scanner, va_list* ap,
 {
     consume(scanner);
     int width = integer(scanner);
+    assert(width > 0);
 
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
@@ -417,11 +436,11 @@ void write_l(ostream& stream, Scanner* scanner, va_list* ap,
         char valstr;
         if (value)
         {
-            valstr = 'T';
+            valstr = FORTRAN_TRUE;
         }
         else
         {
-            valstr = 'F';   
+            valstr = FORTRAN_FALSE;   
         }
         std::ios_base::fmtflags f(stream.flags());
         stream << std::right << std::setw(width) << valstr;
@@ -437,7 +456,9 @@ void write_a(ostream& stream, Scanner* scanner, va_list* ap,
     int width = 0;
     if (is_digit(peek(scanner)))
     {
+        // if the user specify a width, it must be nonzero
         width = integer(scanner);
+        assert(width > 0);
     }
 
     // pop arg value(s)
@@ -593,7 +614,6 @@ bool format_sign(Scanner* scanner, bool const opt_plus_sign)
 }
 
 
-
 void format_i(char* put, int const value, size_t const width, size_t const fill,
     bool const plus_sign)
 {
@@ -609,7 +629,7 @@ void format_i(char* put, int const value, size_t const width, size_t const fill,
     size_t pos = 0;
     if (maxlen > width)
     {
-        fill_with_char(put, '*', width);
+        fill_with_char(put, OVERFLOW_FILL_CHAR, width);
         pos = pos + width;
     }
     else
@@ -683,7 +703,7 @@ void format_f(char* put, double const value, size_t const width,
 
     if (width < 2 || maxlen > width)
     {
-        fill_with_char(put, '*', width);
+        fill_with_char(put, OVERFLOW_FILL_CHAR, width);
     }
     else if (precision == 0)
     {
@@ -723,7 +743,7 @@ void format_f(char* put, double const value, size_t const width,
             }
             else
             {
-                fill_with_char(put, '*', width);
+                fill_with_char(put, OVERFLOW_FILL_CHAR, width);
             }
         }
         else
@@ -816,7 +836,7 @@ void format_e(char* put, double const value, size_t const width,
     size_t pos = 0;
     if (LEN > width)
     {
-        fill_with_char(put, '*', width);
+        fill_with_char(put, OVERFLOW_FILL_CHAR, width);
         pos = pos + width;
     }
     else
@@ -922,7 +942,8 @@ void format_g(char* put, double const value, size_t const width,
     if (MIN > absvalue || absvalue >= MAX)
     {
         // format as Ew.dEe
-        format_e(put, value, width, precision, 'E', exponent, plus_sign);
+        format_e(put, value, width, precision, EXPONENTIAL_E, 
+            exponent, plus_sign);
     }
     else
     {
@@ -956,7 +977,7 @@ void format_g(char* put, double const value, size_t const width,
         }
         else
         {
-            fill_with_char(put, '*', width);
+            fill_with_char(put, OVERFLOW_FILL_CHAR, width);
             put[width] = '\0';
         }
     }
@@ -1018,7 +1039,8 @@ void write_integer(char* put, double const value,
         // round last digit
         if (rounded_last_digit && pos == digits - 1)
         {
-            double lastval = round(absvalue - static_cast<int>(absvalue/10.0) * 10.0);
+            double lastval = round(absvalue - 
+                static_cast<int>(absvalue/10.0) * 10.0);
             newvalue = static_cast<int>(lastval);
         }
 
@@ -1054,8 +1076,8 @@ size_t frac_zeroes(double const value)
 }
 
 
-void extract_fractional_part(char* put, double const value, size_t const precision, 
-    bool const rounded_last_digit)
+void extract_fractional_part(char* put, double const value, 
+    size_t const precision, bool const rounded_last_digit)
 {
     double absvalue = fabs(value);
 
