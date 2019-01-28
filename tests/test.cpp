@@ -3,7 +3,6 @@
 #include <sstream>
 #include <string>
 #include <fortranformat.hpp>
-#include "fortranformat_tests.hpp"
 #include "acutest.h"
 
 
@@ -52,6 +51,48 @@ TEST_LIST = {
     {0}
 };
 
+
+//
+// fortranformat.cpp private functions
+//
+
+#include <cstdarg>
+#include <ostream>
+using std::ostream;
+
+
+void printfor(char const*, ...);
+
+void printfor(ostream&, char const*, ...);
+
+struct Scanner {
+    const char* start;
+    const char* current;
+
+    Scanner(const char* const source)
+    {
+        this->start   = source;
+        this->current = source;
+    }
+};
+
+void stream_printfor(ostream&, char const* const, va_list*);
+
+void format_i(char*, int const, size_t const, size_t const, bool const);
+void format_f(char*, double const, size_t const, size_t const, bool const);
+void format_g(char*, double const, size_t const, size_t const, size_t const, 
+    bool const);
+void format_e(char*, double const, size_t const, size_t const, char const, 
+    size_t const, bool const);
+size_t integer_str_length(unsigned int const);
+size_t frac_zeroes(double const);
+void write_integer(char*, double const, bool const, bool const);
+void extract_fractional_part(char*, double const, size_t const, bool const);
+
+
+//
+// tests
+//
 
 void test_basic()
 {
