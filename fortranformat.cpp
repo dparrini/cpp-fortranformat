@@ -48,7 +48,6 @@ char const EXPONENTIAL_E = 'E';
 // character to fill when the number width overflows specified width
 char const OVERFLOW_FILL_CHAR = '*';
 
-#ifndef DEBUG
 
 struct Scanner {
     const char* start;
@@ -61,514 +60,272 @@ struct Scanner {
     }
 };
 
-void stream_printfor(ostream&, char const* const, va_list*);
-
-
-bool write_group(ostream&, Scanner*, va_list*, bool const );
-void write_i(ostream&, Scanner*, va_list*, size_t const, bool const);
-void write_f(ostream&, Scanner*, va_list*, size_t const, bool const);
-void write_d(ostream&, Scanner*, va_list*, size_t const, bool const);
-void write_e(ostream&, Scanner*, va_list*, size_t const, bool const);
-void write_g(ostream&, Scanner*, va_list*, size_t const, bool const);
-void write_l(ostream&, Scanner*, va_list*, size_t const);
-void write_a(ostream&, Scanner*, va_list*, size_t const);
-void write_x(ostream&, Scanner*, size_t const);
-void write_str(ostream&, Scanner*, char const);
-void write_nl(ostream&, Scanner*);
-void write_h(ostream&, Scanner*, size_t const);
-
-void fill_with_char(char*, char const, size_t const);
-bool format_sign(Scanner*, bool const);
-void format_i(char*, int const, size_t const, size_t const, bool const);
-void format_f(char*, double const, size_t const, size_t const, bool const);
-void format_g(char*, double const, size_t const, size_t const, size_t const, 
-    bool const);
-void format_e(char*, double const, size_t const, size_t const, char const, 
-    size_t const, bool const);
-double fabs(double const);
-bool is_negative(double const);
-size_t fast_10pow(size_t const);
-size_t integer_str_length(unsigned int const);
-size_t frac_zeroes(double const);
-void write_integer(char*, double const, bool const, bool const);
-void extract_fractional_part(char*, double const, size_t const, bool const);
-
-void consume(Scanner* const);
-void extract(Scanner* const, char*, size_t const);
-inline char advance(Scanner* const);
-bool match(Scanner*, char const);
-inline char peek(Scanner const* const);
-inline char peek_next(Scanner const* const);
-bool is_at_end(Scanner const* const);
-inline bool is_digit(char const);
-inline bool is_alpha(char const);
-int integer(Scanner* const);
-void skip_whitespace(Scanner* const);
-
-#endif
-
-
-void printfor(char const* formatstr, ...)
-{
-    va_list ap;
-    va_start(ap, formatstr);
-    stream_printfor(std::cout, formatstr, &ap);
-    va_end(ap);
-}
-
-
-void printfor(ostream& stream, char const* formatstr, ...)
-{
-    va_list ap;
-    va_start(ap, formatstr);
-    stream_printfor(stream, formatstr, &ap);
-    va_end(ap);
-}
-
-
-void stream_printfor(ostream& stream, char const* const formatstr, va_list* ap)
-{
-    bool const OPTIONAL_PLUS_SIGN = false;
-
-    Scanner scanner(formatstr);
-    skip_whitespace(&scanner);
-    char c = advance(&scanner);
-    if ('(' == c)
-    {
-        write_group(stream, &scanner, ap, OPTIONAL_PLUS_SIGN);
-    }
-    stream << '\n';
-}
-
-
-bool write_group(ostream& stream, Scanner* scanner, va_list* ap, 
-    bool const plus_sign)
-{
-    // consume open paren and following whitespace
-    skip_whitespace(scanner);
-    consume(scanner);
-
-    // force optional plus sign for I, F, D, E, G descriptors
-    bool opt_plus_sign = plus_sign;
-
-    for (;;)
-    {
-        char c = advance(scanner);
-
-        // repeat count
-        unsigned int repeat = 1;
-        if (is_digit(c))
-        {
-            repeat = integer(scanner);
-            assert(repeat > 0);
-            c = advance(scanner);
-        }
-
-        // nested group
-        if ('(' == c)
-        {
-            char const* previous = scanner->current;
-            for (size_t repcount = 0; repcount < repeat; ++repcount)
-            {
-                scanner->start = previous;
-                scanner->current = previous;
-                opt_plus_sign = write_group(stream, scanner, ap, opt_plus_sign);    
-            }
-        }
-        // edit descriptors
-        else if (is_alpha(c))
-        {
-            switch(c)
-            {
-                case 'A':
-                    write_a(stream, scanner, ap, repeat); 
-                break;
-
-                case 'D':
-                    write_d(stream, scanner, ap, repeat, opt_plus_sign); 
-                break;
-
-                case 'E':
-                    write_e(stream, scanner, ap, repeat, opt_plus_sign); 
-                break;
-
-                case 'F':
-                    write_f(stream, scanner, ap, repeat, opt_plus_sign); 
-                break;
-
-                case 'G':
-                    write_g(stream, scanner, ap, repeat, opt_plus_sign); 
-                break;
-
-                case 'H':
-                    write_h(stream, scanner, repeat); 
-                break;
-
-                case 'I':
-                    write_i(stream, scanner, ap, repeat, opt_plus_sign); 
-                break;
-
-                case 'L':
-                    write_l(stream, scanner, ap, repeat); 
-                break;
-
-                case 'S':
-                    opt_plus_sign = format_sign(scanner, opt_plus_sign); 
-                break;
-
-                case 'X':
-                    write_x(stream, scanner, repeat); 
-                break;
-            }
-        }
-        else if ('/' == c)
-        {
-            write_nl(stream, scanner);
-        }
-        else if ('\'' == c)
-        {
-            write_str(stream, scanner, '\'');
-        }
-        else if ('"' == c)
-        {
-            write_str(stream, scanner, '"');
-        }
-        else if (')' == c)
-        {
-            consume(scanner);
-            break;
-        }
-        else if (',' == c)
-        {
-            consume(scanner);
-        }
-
-        if (is_at_end(scanner))
-        {
-            break;
-        }
-
-        skip_whitespace(scanner);
-        consume(scanner);
-    }
-
-    // spill group options
-    return opt_plus_sign;
-}
-
 
 //
-// Format write edit descriptors
+// Scanner functions
 //
 
-void write_i(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat, bool const plus_sign)
+void consume(Scanner* const scanner)
 {
-    consume(scanner);
+    scanner->start = scanner->current;
+}
 
-    int width = integer(scanner);
-    assert(width > 0);
-    int fill = 0;
-    
-    if (peek(scanner) == '.')
+
+void extract(Scanner* const scanner, char* put, size_t const length)
+{
+    size_t len = (scanner->current - scanner->start) + 1;
+    if (len > length)
+    {
+        len = length;
+    }
+    strncpy(put, scanner->start, len);
+    put[len-1] = '\0';
+
+    consume(scanner);
+}
+
+
+inline char advance(Scanner* const scanner)
+{
+    scanner->current++;
+    return scanner->current[-1];
+}
+
+
+bool is_at_end(Scanner const* const scanner)
+{
+    return '\0' == scanner->current[0];
+}
+
+
+bool match(Scanner* const scanner, char const expected)
+{
+    if (is_at_end(scanner))
+    {
+        return false;
+    }
+    if (scanner->current[0] != expected)
+    {
+        return false;
+    }
+
+    scanner->current++;
+    return true;
+}
+
+
+inline char peek(Scanner const* const scanner)
+{
+    return scanner->current[0];
+}
+
+
+inline char peek_next(Scanner const* const scanner)
+{
+    if (is_at_end(scanner))
+    {
+        return '\0';
+    }
+    return scanner->current[1];
+}
+
+
+inline bool is_digit(char const c)
+{
+    return c >= '0' && c <= '9';
+}
+
+
+inline bool is_alpha(char const c)
+{
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+}
+
+
+int integer(Scanner* const scanner)
+{
+    int val = 0;
+
+    while(is_digit(peek(scanner)))
     {
         advance(scanner);
-        consume(scanner);
-        fill = integer(scanner);
     }
 
-    // pop arg value(s)
-    for (size_t repcount = 0; repcount < repeat; ++repcount)
-    {
-        int value = va_arg(*ap, int); 
-        char put[MAX_STR_LEN];
-
-        format_i(put, value, width, fill, plus_sign);
-        stream << put;
-    }
-}
-
-
-void write_f(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat, bool const plus_sign)
-{
-    consume(scanner);
-
-    int width = integer(scanner);
-    assert(width > 0);
-    int fractional = 0;
-
-    // dot character
-    advance(scanner); 
-    consume(scanner);
-    fractional = integer(scanner);
-    
-    // pop arg value(s)
-    for (size_t repcount = 0; repcount < repeat; ++repcount)
-    {
-        double value = va_arg(*ap, double); 
-        char put[MAX_STR_LEN];
-
-        format_f(put, value, width, fractional, plus_sign);
-        stream << put;
-    }
-}
-
-
-void write_d(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat, bool const plus_sign)
-{
-    // TODO: similar to write_e
-    consume(scanner);
-
-    int width = integer(scanner);
-    assert(width > 0);
-    int fractional = 0;
-
-    // dot character
-    advance(scanner); 
-    consume(scanner);
-    fractional = integer(scanner);
-    
-    // pop arg value(s)
-    for (size_t repcount = 0; repcount < repeat; ++repcount)
-    {
-        double value = va_arg(*ap, double); 
-        char put[MAX_STR_LEN];
-
-        format_e(put, value, width, fractional, EXPONENTIAL_D, DEFAULT_EXPONENT, 
-            plus_sign);  
-        stream << put;
-    }
-}
-
-
-void write_e(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat, bool const plus_sign)
-{
-    // TODO: similar to write_d
-    consume(scanner);
-
-    int width = integer(scanner);
-    assert(width > 0);
-    int fractional = 0;
-
-    // dot character
-    advance(scanner); 
-    consume(scanner);
-    fractional = integer(scanner);
-
-    size_t exponent = DEFAULT_EXPONENT;
-    if (peek(scanner) == 'E')
-    {
-        advance(scanner); 
-        consume(scanner);
-        exponent = integer(scanner);
-    }
-    
-    // pop arg value(s)
-    for (size_t repcount = 0; repcount < repeat; ++repcount)
-    {
-        double value = va_arg(*ap, double); 
-        char put[MAX_STR_LEN];
-
-        format_e(put, value, width, fractional, EXPONENTIAL_E, exponent, 
-            plus_sign);  
-        stream << put;
-    }
-}
-
-
-void write_g(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat, bool const plus_sign)
-{
-    // TODO: similar to write_d and write_e
-    consume(scanner);
-
-    int width = integer(scanner);
-    assert(width > 0);
-    int fractional = 0;
-
-    // dot character
-    advance(scanner); 
-    consume(scanner);
-    fractional = integer(scanner);
-
-    size_t exponent = DEFAULT_EXPONENT;
-    if (peek(scanner) == EXPONENTIAL_E)
-    {
-        advance(scanner); 
-        consume(scanner);
-        exponent = integer(scanner);
-    }
-    
-    // pop arg value(s)
-    for (size_t repcount = 0; repcount < repeat; ++repcount)
-    {
-        double value = va_arg(*ap, double); 
-        char put[MAX_STR_LEN];
-
-        format_g(put, value, width, fractional, exponent, plus_sign);  
-        stream << put;
-    }
-}
-
-
-void write_l(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat)
-{
-    consume(scanner);
-    int width = integer(scanner);
-    assert(width > 0);
-
-    // pop arg value(s)
-    for (size_t repcount = 0; repcount < repeat; ++repcount)
-    {
-        int value = va_arg(*ap, int); 
-        char valstr;
-        if (value)
-        {
-            valstr = FORTRAN_TRUE;
-        }
-        else
-        {
-            valstr = FORTRAN_FALSE;   
-        }
-        std::ios_base::fmtflags f(stream.flags());
-        stream << std::right << std::setw(width) << valstr;
-        stream.flags(f);
-    }
-}
-
-
-void write_a(ostream& stream, Scanner* scanner, va_list* ap, 
-    size_t const repeat)
-{
-    consume(scanner);
-    int width = 0;
-    if (is_digit(peek(scanner)))
-    {
-        // if the user specify a width, it must be nonzero
-        width = integer(scanner);
-        assert(width > 0);
-    }
-
-    // pop arg value(s)
-    for (size_t repcount = 0; repcount < repeat; ++repcount)
-    {
-        char const* value = va_arg(*ap, char const*); 
-
-        std::ios_base::fmtflags f(stream.flags());
-        if (width > 0)
-        {
-            char valsub[MAX_STR_LEN];
-            strncpy(valsub, value, width);
-            valsub[width] = '\0';
-
-            stream << std::setw(width);   
-            stream << valsub; 
-        }
-        else
-        {
-            stream << value;  
-        }
-        stream.flags(f);
-    }
-}
-
-
-void write_x(ostream& stream, Scanner* scanner, 
-    size_t const repeat)
-{
-    consume(scanner); // consume X
-
-    // print whitespace
-    for (size_t repcount = 0; repcount < repeat; ++repcount)
-    {
-        stream << " ";
-    }
-}
-
-
-void write_str(ostream& stream, Scanner* scanner, char const opening)
-{
-    // extracted string
-    char valstr[MAX_STR_LEN];
-    // pointer to current character being written
-    char* strinit = valstr;
-
-    size_t length_left = MAX_STR_LEN;
-
-    consume(scanner); // consume opening ' or "
-    for (;;)
-    {
-        // TODO: test length_left for 0 value or underflow
-        char c = peek(scanner);
-        if (opening == c)
-        {
-            if (peek_next(scanner) != opening)
-            {
-                break;
-            }
-            else
-            {
-                // consume one of the quotation marks
-                advance(scanner);
-                // copy characters until the first quotation mark
-                extract(scanner, strinit, length_left);
-                // move pointer
-                strinit = strinit + strlen(strinit);
-                length_left = MAX_STR_LEN - (strinit - valstr);
-                // jump escape character
-                advance(scanner);
-                consume(scanner);
-            }
-        }
-        else
-        {
-            advance(scanner);
-        }
-    }
-    // extract string before last '
-    
-    extract(scanner, strinit, length_left);
-
-    advance(scanner);
-    consume(scanner); // consume last '
-
-    // print user string
-    stream << valstr;
-}
-
-
-void write_nl(ostream& stream, Scanner* scanner)
-{
-    consume(scanner); // consume the slash
-    stream << '\n';
-}
-
-
-void write_h(ostream& stream, Scanner* scanner, 
-    size_t const length)
-{
-    consume(scanner); // consume opening '
-    for (size_t count = 0; count < length; ++count)
-    {
-        // TODO: deal with '' escape. count it as 1 char.
-        advance(scanner);
-    }
-    // extract string before last '
     char valstr[MAX_STR_LEN];
     extract(scanner, valstr, MAX_STR_LEN);
+    scanner->start = scanner->current;
 
-    // consume last '
-    advance(scanner);
-    consume(scanner); 
+    val = atoi(valstr);
 
-    // print user string
-    stream << valstr;
+    return val;
 }
 
+
+void skip_whitespace(Scanner* const scanner)
+{
+    for (;;)
+    {
+        char c = peek(scanner);
+        switch (c)
+        {
+            case ' ':
+            case '\r':
+            case '\t':
+            case '\n': // is this expected?
+                advance(scanner);
+                break;
+            default:
+                return;
+        }
+    }
+}
+
+
+//
+// Numbers auxiliary functions
+//
+
+inline bool is_negative(double const value)
+{
+    // a function that handles 0.0 and -0.0 (the test -0.0 < 0.0 fails)
+    return std::signbit(value);
+}
+
+
+size_t fast_10pow(size_t const exponent)
+{
+    static size_t pow10[10] = {
+        1, 10, 100, 1000, 10000, 
+        100000, 1000000, 10000000, 100000000, 1000000000
+    };
+
+    if (exponent <= 9)
+    {
+        // fast, look-up
+        return pow10[exponent];
+    }
+    else
+    {
+        // generic
+        size_t powered = 1;
+        for (size_t n=0; n < exponent; ++n)
+        {
+            powered = powered * 10;
+        }
+        return powered;
+    }
+}
+
+
+size_t integer_str_length(unsigned int const value)
+{
+    // general solution (using it for big numbers)
+    if (value >= 10000000) return floor(log10(value)) + 1;
+    // ugly, but optimal
+    // credits: https://stackoverflow.com/a/3069580
+    if (value >= 100000 )  return 6;
+    if (value >= 10000  )  return 5;
+    if (value >= 1000   )  return 4;
+    if (value >= 100    )  return 3;
+    if (value >= 10     )  return 2;
+    return 1;
+}
+
+
+void write_integer(char* put, double const value, 
+    bool const rounded_last_digit, bool const insert_nul)
+{
+    double absvalue = fabs(value);
+    unsigned int intpart = abs(static_cast<int>(value));
+    size_t const digits = integer_str_length(abs(intpart));
+
+    for(size_t pos = 0; pos < digits; ++pos)
+    {
+        size_t power = fast_10pow(digits - pos - 1);
+        unsigned int newvalue = static_cast<int>(intpart / power);
+
+        // round last digit
+        if (rounded_last_digit && pos == digits - 1)
+        {
+            double lastval = round(absvalue - 
+                static_cast<int>(absvalue/10.0) * 10.0);
+            newvalue = static_cast<int>(lastval);
+        }
+
+        put[pos] = newvalue + '0';
+
+        intpart = intpart - newvalue * power;
+    }  
+    if (insert_nul)
+    {
+        put[digits] = '\0';
+    }
+}
+
+
+size_t frac_zeroes(double const value)
+{   
+    if (value >= 1.0)
+    {
+        return 0;
+    }
+    double absvalue = fabs(value);
+    // general solution (using it for small numbers)
+    if (absvalue < 0.000001) return -floor(log10(absvalue)) + 1;
+    // ugly, but optimal
+    // similar: https://stackoverflow.com/a/3069580
+    if (absvalue < 0.000001)  return 6;
+    if (absvalue < 0.00001 )  return 5;
+    if (absvalue < 0.0001  )  return 4;
+    if (absvalue < 0.001   )  return 3;
+    if (absvalue < 0.01    )  return 2;
+    if (absvalue < 0.1     )  return 1;
+    return 0;
+}
+
+
+void extract_fractional_part(char* put, double const value, 
+    size_t const precision, bool const rounded_last_digit)
+{
+    double absvalue = fabs(value);
+
+    if (rounded_last_digit)
+    {
+        double last_digit = fast_10pow(precision) * absvalue;
+        // last digit under specified precision, multiplied by 10
+        int last_digit_int = static_cast<int>(last_digit) * 10;
+        double digit_after = fast_10pow(precision + 1) * absvalue - last_digit_int;
+
+        if (static_cast<int>(fabs(round(digit_after))) >= 5)
+        {
+            absvalue = absvalue + 1.0 / static_cast<double>(fast_10pow(precision));
+        }
+    }
+
+    int intpart = static_cast<int>(absvalue);
+    double decpart = absvalue - intpart;
+
+    // power of ten
+    double power = 1;
+    for (size_t pw = 0; pw < precision; ++pw)
+    {
+        power = power * 10;
+        decpart = absvalue * power - static_cast<int>(absvalue*(power/10))*10;
+        intpart = static_cast<int>(decpart);
+        put[pw] = intpart + '0';
+    }
+    put[precision] = '\0';
+}
+
+
+inline double fabs(double const value)
+{
+    if (is_negative(value))
+    {
+        return -value;
+    }
+    return value;
+}
 
 //
 // Number formatting
@@ -976,269 +733,468 @@ void format_g(char* put, double const value, size_t const width,
 }
 
 
-size_t fast_10pow(size_t const exponent)
-{
-    static size_t pow10[10] = {
-        1, 10, 100, 1000, 10000, 
-        100000, 1000000, 10000000, 100000000, 1000000000
-    };
-
-    if (exponent <= 9)
-    {
-        // fast, look-up
-        return pow10[exponent];
-    }
-    else
-    {
-        // generic
-        size_t powered = 1;
-        for (size_t n=0; n < exponent; ++n)
-        {
-            powered = powered * 10;
-        }
-        return powered;
-    }
-}
-
-
-size_t integer_str_length(unsigned int const value)
-{
-    // general solution (using it for big numbers)
-    if (value >= 10000000) return floor(log10(value)) + 1;
-    // ugly, but optimal
-    // credits: https://stackoverflow.com/a/3069580
-    if (value >= 100000 )  return 6;
-    if (value >= 10000  )  return 5;
-    if (value >= 1000   )  return 4;
-    if (value >= 100    )  return 3;
-    if (value >= 10     )  return 2;
-    return 1;
-}
-
-
-void write_integer(char* put, double const value, 
-    bool const rounded_last_digit, bool const insert_nul)
-{
-    double absvalue = fabs(value);
-    unsigned int intpart = abs(static_cast<int>(value));
-    size_t const digits = integer_str_length(abs(intpart));
-
-    for(size_t pos = 0; pos < digits; ++pos)
-    {
-        size_t power = fast_10pow(digits - pos - 1);
-        unsigned int newvalue = static_cast<int>(intpart / power);
-
-        // round last digit
-        if (rounded_last_digit && pos == digits - 1)
-        {
-            double lastval = round(absvalue - 
-                static_cast<int>(absvalue/10.0) * 10.0);
-            newvalue = static_cast<int>(lastval);
-        }
-
-        put[pos] = newvalue + '0';
-
-        intpart = intpart - newvalue * power;
-    }  
-    if (insert_nul)
-    {
-        put[digits] = '\0';
-    }
-}
-
-
-size_t frac_zeroes(double const value)
-{   
-    if (value >= 1.0)
-    {
-        return 0;
-    }
-    double absvalue = fabs(value);
-    // general solution (using it for small numbers)
-    if (absvalue < 0.000001) return -floor(log10(absvalue)) + 1;
-    // ugly, but optimal
-    // similar: https://stackoverflow.com/a/3069580
-    if (absvalue < 0.000001)  return 6;
-    if (absvalue < 0.00001 )  return 5;
-    if (absvalue < 0.0001  )  return 4;
-    if (absvalue < 0.001   )  return 3;
-    if (absvalue < 0.01    )  return 2;
-    if (absvalue < 0.1     )  return 1;
-    return 0;
-}
-
-
-void extract_fractional_part(char* put, double const value, 
-    size_t const precision, bool const rounded_last_digit)
-{
-    double absvalue = fabs(value);
-
-    if (rounded_last_digit)
-    {
-        double last_digit = fast_10pow(precision) * absvalue;
-        // last digit under specified precision, multiplied by 10
-        int last_digit_int = static_cast<int>(last_digit) * 10;
-        double digit_after = fast_10pow(precision + 1) * absvalue - last_digit_int;
-
-        if (static_cast<int>(fabs(round(digit_after))) >= 5)
-        {
-            absvalue = absvalue + 1.0 / static_cast<double>(fast_10pow(precision));
-        }
-    }
-
-    int intpart = static_cast<int>(absvalue);
-    double decpart = absvalue - intpart;
-
-    // power of ten
-    double power = 1;
-    for (size_t pw = 0; pw < precision; ++pw)
-    {
-        power = power * 10;
-        decpart = absvalue * power - static_cast<int>(absvalue*(power/10))*10;
-        intpart = static_cast<int>(decpart);
-        put[pw] = intpart + '0';
-    }
-    put[precision] = '\0';
-}
-
-
-inline double fabs(double const value)
-{
-    if (is_negative(value))
-    {
-        return -value;
-    }
-    return value;
-}
-
-
-inline bool is_negative(double const value)
-{
-    // a function that handles 0.0 and -0.0 (the test -0.0 < 0.0 fails)
-    return std::signbit(value);
-}
-
 //
-// Scanner functions
+// Format write edit descriptors
 //
 
-void consume(Scanner* const scanner)
+void write_i(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat, bool const plus_sign)
 {
-    scanner->start = scanner->current;
-}
-
-
-void extract(Scanner* const scanner, char* put, size_t const length)
-{
-    size_t len = (scanner->current - scanner->start) + 1;
-    if (len > length)
-    {
-        len = length;
-    }
-    strncpy(put, scanner->start, len);
-    put[len-1] = '\0';
-
     consume(scanner);
-}
 
-
-inline char advance(Scanner* const scanner)
-{
-    scanner->current++;
-    return scanner->current[-1];
-}
-
-
-bool match(Scanner* const scanner, char const expected)
-{
-    if (is_at_end(scanner))
-    {
-        return false;
-    }
-    if (scanner->current[0] != expected)
-    {
-        return false;
-    }
-
-    scanner->current++;
-    return true;
-}
-
-
-inline char peek(Scanner const* const scanner)
-{
-    return scanner->current[0];
-}
-
-
-inline char peek_next(Scanner const* const scanner)
-{
-    if (is_at_end(scanner))
-    {
-        return '\0';
-    }
-    return scanner->current[1];
-}
-
-
-bool is_at_end(Scanner const* const scanner)
-{
-    switch (scanner->current[0])
-    {
-        case '\0':  // c null terminator character
-            return true;
-        default:
-            return false;
-    }
-}
-
-
-inline bool is_digit(char const c)
-{
-    return c >= '0' && c <= '9';
-}
-
-
-inline bool is_alpha(char const c)
-{
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
-}
-
-
-int integer(Scanner* const scanner)
-{
-    int val = 0;
-
-    while(is_digit(peek(scanner)))
+    int width = integer(scanner);
+    assert(width > 0);
+    int fill = 0;
+    
+    if (peek(scanner) == '.')
     {
         advance(scanner);
+        consume(scanner);
+        fill = integer(scanner);
     }
 
-    char valstr[MAX_STR_LEN];
-    extract(scanner, valstr, MAX_STR_LEN);
-    scanner->start = scanner->current;
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        int value = va_arg(*ap, int); 
+        char put[MAX_STR_LEN];
 
-    val = atoi(valstr);
-
-    return val;
+        format_i(put, value, width, fill, plus_sign);
+        stream << put;
+    }
 }
 
 
-void skip_whitespace(Scanner* const scanner)
+void write_f(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat, bool const plus_sign)
 {
+    consume(scanner);
+
+    int width = integer(scanner);
+    assert(width > 0);
+    int fractional = 0;
+
+    // dot character
+    advance(scanner); 
+    consume(scanner);
+    fractional = integer(scanner);
+    
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        double value = va_arg(*ap, double); 
+        char put[MAX_STR_LEN];
+
+        format_f(put, value, width, fractional, plus_sign);
+        stream << put;
+    }
+}
+
+
+void write_d(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat, bool const plus_sign)
+{
+    // TODO: similar to write_e
+    consume(scanner);
+
+    int width = integer(scanner);
+    assert(width > 0);
+    int fractional = 0;
+
+    // dot character
+    advance(scanner); 
+    consume(scanner);
+    fractional = integer(scanner);
+    
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        double value = va_arg(*ap, double); 
+        char put[MAX_STR_LEN];
+
+        format_e(put, value, width, fractional, EXPONENTIAL_D, DEFAULT_EXPONENT, 
+            plus_sign);  
+        stream << put;
+    }
+}
+
+
+void write_e(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat, bool const plus_sign)
+{
+    // TODO: similar to write_d
+    consume(scanner);
+
+    int width = integer(scanner);
+    assert(width > 0);
+    int fractional = 0;
+
+    // dot character
+    advance(scanner); 
+    consume(scanner);
+    fractional = integer(scanner);
+
+    size_t exponent = DEFAULT_EXPONENT;
+    if (peek(scanner) == 'E')
+    {
+        advance(scanner); 
+        consume(scanner);
+        exponent = integer(scanner);
+    }
+    
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        double value = va_arg(*ap, double); 
+        char put[MAX_STR_LEN];
+
+        format_e(put, value, width, fractional, EXPONENTIAL_E, exponent, 
+            plus_sign);  
+        stream << put;
+    }
+}
+
+
+void write_g(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat, bool const plus_sign)
+{
+    // TODO: similar to write_d and write_e
+    consume(scanner);
+
+    int width = integer(scanner);
+    assert(width > 0);
+    int fractional = 0;
+
+    // dot character
+    advance(scanner); 
+    consume(scanner);
+    fractional = integer(scanner);
+
+    size_t exponent = DEFAULT_EXPONENT;
+    if (peek(scanner) == EXPONENTIAL_E)
+    {
+        advance(scanner); 
+        consume(scanner);
+        exponent = integer(scanner);
+    }
+    
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        double value = va_arg(*ap, double); 
+        char put[MAX_STR_LEN];
+
+        format_g(put, value, width, fractional, exponent, plus_sign);  
+        stream << put;
+    }
+}
+
+
+void write_l(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat)
+{
+    consume(scanner);
+    int width = integer(scanner);
+    assert(width > 0);
+
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        int value = va_arg(*ap, int); 
+        char valstr;
+        if (value)
+        {
+            valstr = FORTRAN_TRUE;
+        }
+        else
+        {
+            valstr = FORTRAN_FALSE;   
+        }
+        std::ios_base::fmtflags f(stream.flags());
+        stream << std::right << std::setw(width) << valstr;
+        stream.flags(f);
+    }
+}
+
+
+void write_a(ostream& stream, Scanner* scanner, va_list* ap, 
+    size_t const repeat)
+{
+    consume(scanner);
+    int width = 0;
+    if (is_digit(peek(scanner)))
+    {
+        // if the user specify a width, it must be nonzero
+        width = integer(scanner);
+        assert(width > 0);
+    }
+
+    // pop arg value(s)
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        char const* value = va_arg(*ap, char const*); 
+
+        std::ios_base::fmtflags f(stream.flags());
+        if (width > 0)
+        {
+            char valsub[MAX_STR_LEN];
+            strncpy(valsub, value, width);
+            valsub[width] = '\0';
+
+            stream << std::setw(width);   
+            stream << valsub; 
+        }
+        else
+        {
+            stream << value;  
+        }
+        stream.flags(f);
+    }
+}
+
+
+void write_x(ostream& stream, Scanner* scanner, 
+    size_t const repeat)
+{
+    consume(scanner); // consume X
+
+    // print whitespace
+    for (size_t repcount = 0; repcount < repeat; ++repcount)
+    {
+        stream << " ";
+    }
+}
+
+
+void write_str(ostream& stream, Scanner* scanner, char const opening)
+{
+    // extracted string
+    char valstr[MAX_STR_LEN];
+    // pointer to current character being written
+    char* strinit = valstr;
+
+    size_t length_left = MAX_STR_LEN;
+
+    consume(scanner); // consume opening ' or "
     for (;;)
     {
+        // TODO: test length_left for 0 value or underflow
         char c = peek(scanner);
-        switch (c)
+        if (opening == c)
         {
-            case ' ':
-            case '\r':
-            case '\t':
-            case '\n': // is this expected?
-                advance(scanner);
+            if (peek_next(scanner) != opening)
+            {
                 break;
-            default:
-                return;
+            }
+            else
+            {
+                // consume one of the quotation marks
+                advance(scanner);
+                // copy characters until the first quotation mark
+                extract(scanner, strinit, length_left);
+                // move pointer
+                strinit = strinit + strlen(strinit);
+                length_left = MAX_STR_LEN - (strinit - valstr);
+                // jump escape character
+                advance(scanner);
+                consume(scanner);
+            }
+        }
+        else
+        {
+            advance(scanner);
         }
     }
+    // extract string before last '
+    
+    extract(scanner, strinit, length_left);
+
+    advance(scanner);
+    consume(scanner); // consume last '
+
+    // print user string
+    stream << valstr;
 }
+
+
+void write_nl(ostream& stream, Scanner* scanner)
+{
+    consume(scanner); // consume the slash
+    stream << '\n';
+}
+
+
+void write_h(ostream& stream, Scanner* scanner, 
+    size_t const length)
+{
+    consume(scanner); // consume opening '
+    for (size_t count = 0; count < length; ++count)
+    {
+        // TODO: deal with '' escape. count it as 1 char.
+        advance(scanner);
+    }
+    // extract string before last '
+    char valstr[MAX_STR_LEN];
+    extract(scanner, valstr, MAX_STR_LEN);
+
+    // consume last '
+    advance(scanner);
+    consume(scanner); 
+
+    // print user string
+    stream << valstr;
+}
+
+
+bool write_group(ostream& stream, Scanner* scanner, va_list* ap, 
+    bool const plus_sign)
+{
+    // consume open paren and following whitespace
+    skip_whitespace(scanner);
+    consume(scanner);
+
+    // force optional plus sign for I, F, D, E, G descriptors
+    bool opt_plus_sign = plus_sign;
+
+    for (;;)
+    {
+        char c = advance(scanner);
+
+        // repeat count
+        unsigned int repeat = 1;
+        if (is_digit(c))
+        {
+            repeat = integer(scanner);
+            assert(repeat > 0);
+            c = advance(scanner);
+        }
+
+        // nested group
+        if ('(' == c)
+        {
+            char const* previous = scanner->current;
+            for (size_t repcount = 0; repcount < repeat; ++repcount)
+            {
+                scanner->start = previous;
+                scanner->current = previous;
+                opt_plus_sign = write_group(stream, scanner, ap, opt_plus_sign);    
+            }
+        }
+        // edit descriptors
+        else if (is_alpha(c))
+        {
+            switch(c)
+            {
+                case 'A':
+                    write_a(stream, scanner, ap, repeat); 
+                break;
+
+                case 'D':
+                    write_d(stream, scanner, ap, repeat, opt_plus_sign); 
+                break;
+
+                case 'E':
+                    write_e(stream, scanner, ap, repeat, opt_plus_sign); 
+                break;
+
+                case 'F':
+                    write_f(stream, scanner, ap, repeat, opt_plus_sign); 
+                break;
+
+                case 'G':
+                    write_g(stream, scanner, ap, repeat, opt_plus_sign); 
+                break;
+
+                case 'H':
+                    write_h(stream, scanner, repeat); 
+                break;
+
+                case 'I':
+                    write_i(stream, scanner, ap, repeat, opt_plus_sign); 
+                break;
+
+                case 'L':
+                    write_l(stream, scanner, ap, repeat); 
+                break;
+
+                case 'S':
+                    opt_plus_sign = format_sign(scanner, opt_plus_sign); 
+                break;
+
+                case 'X':
+                    write_x(stream, scanner, repeat); 
+                break;
+            }
+        }
+        else if ('/' == c)
+        {
+            write_nl(stream, scanner);
+        }
+        else if ('\'' == c)
+        {
+            write_str(stream, scanner, '\'');
+        }
+        else if ('"' == c)
+        {
+            write_str(stream, scanner, '"');
+        }
+        else if (')' == c)
+        {
+            consume(scanner);
+            break;
+        }
+        else if (',' == c)
+        {
+            consume(scanner);
+        }
+
+        if (is_at_end(scanner))
+        {
+            break;
+        }
+
+        skip_whitespace(scanner);
+        consume(scanner);
+    }
+
+    // spill group options
+    return opt_plus_sign;
+}
+
+
+//
+// Public Interface
+//
+
+void stream_printfor(ostream& stream, char const* const formatstr, va_list* ap)
+{
+    bool const OPTIONAL_PLUS_SIGN = false;
+
+    Scanner scanner(formatstr);
+    skip_whitespace(&scanner);
+    char c = advance(&scanner);
+    if ('(' == c)
+    {
+        write_group(stream, &scanner, ap, OPTIONAL_PLUS_SIGN);
+    }
+    stream << '\n';
+}
+
+
+void printfor(char const* formatstr, ...)
+{
+    va_list ap;
+    va_start(ap, formatstr);
+    stream_printfor(std::cout, formatstr, &ap);
+    va_end(ap);
+}
+
+
+void printfor(ostream& stream, char const* formatstr, ...)
+{
+    va_list ap;
+    va_start(ap, formatstr);
+    stream_printfor(stream, formatstr, &ap);
+    va_end(ap);
+}
+
