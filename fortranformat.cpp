@@ -25,7 +25,6 @@
 #include <cmath>
 #include <cstdarg>
 #include <cstring>
-#include <iomanip>
 #include <iostream>
 #include <ostream>
 #include "fortranformat.hpp"
@@ -894,25 +893,30 @@ void write_l(ostream& stream, Scanner* scanner, va_list* ap,
     size_t const repeat)
 {
     consume(scanner);
-    int width = integer(scanner);
+    size_t width = integer(scanner);
     assert(width > 0);
 
     // pop arg value(s)
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
-        int value = va_arg(*ap, int); 
-        char valstr;
+        int value = va_arg(*ap, int);
+
+        size_t pos = 0;
+        char valstr[MAX_STR_LEN];
+        for (;pos < width - 1; ++pos)
+        {
+            valstr[pos] = ' ';
+        }
         if (value)
         {
-            valstr = FORTRAN_TRUE;
+            valstr[pos] = FORTRAN_TRUE;
         }
         else
         {
-            valstr = FORTRAN_FALSE;   
+            valstr[pos] = FORTRAN_FALSE;   
         }
-        std::ios_base::fmtflags f(stream.flags());
-        stream << std::right << std::setw(width) << valstr;
-        stream.flags(f);
+        valstr[width] = '\0';
+        stream << valstr;
     }
 }
 
@@ -921,7 +925,7 @@ void write_a(ostream& stream, Scanner* scanner, va_list* ap,
     size_t const repeat)
 {
     consume(scanner);
-    int width = 0;
+    size_t width = 0;
     if (is_digit(peek(scanner)))
     {
         // if the user specify a width, it must be nonzero
@@ -933,22 +937,33 @@ void write_a(ostream& stream, Scanner* scanner, va_list* ap,
     for (size_t repcount = 0; repcount < repeat; ++repcount)
     {
         char const* value = va_arg(*ap, char const*); 
+        size_t value_width = strlen(value);
 
-        std::ios_base::fmtflags f(stream.flags());
         if (width > 0)
         {
             char valsub[MAX_STR_LEN];
-            strncpy(valsub, value, width);
+
+            size_t pos = 0;
+            size_t whats_left = width;
+            if (width > value_width)
+            {
+                // pad with whitespace
+                for (; pos < width - value_width; ++pos)
+                {
+                    valsub[pos] = ' ';
+                }
+                whats_left = value_width;
+            }
+            
+            strncpy(valsub + pos, value, whats_left);
             valsub[width] = '\0';
 
-            stream << std::setw(width);   
             stream << valsub; 
         }
         else
         {
             stream << value;  
         }
-        stream.flags(f);
     }
 }
 

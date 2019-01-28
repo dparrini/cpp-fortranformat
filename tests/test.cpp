@@ -1,7 +1,5 @@
 #include <cstring>
-#include <cctype>
 #include <iostream>
-#include <iomanip>
 #include <sstream>
 #include <string>
 #include "fortranformat_tests.hpp"
