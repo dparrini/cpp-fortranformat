@@ -7,6 +7,7 @@
 
 
 void test_basic();
+void test_examples();
 void test_integer();
 void test_float();
 void test_logical();
@@ -38,6 +39,7 @@ char const EXPONENTIAL_E = 'E';
 
 TEST_LIST = {
     { "basic", test_basic },
+    { "examples", test_examples },
     { "integer", test_integer },
     { "float", test_float },
     { "logical", test_logical },
@@ -211,7 +213,28 @@ void test_basic()
     TEST_CHECK(frac_zeroes(0.004) == 2);
     TEST_CHECK(frac_zeroes(-0.0005) == 3);
     TEST_CHECK(frac_zeroes(0.00001) == 4);
-    TEST_CHECK(frac_zeroes(1.0E-08) == 9);
+    TEST_CHECK(frac_zeroes(1.0E-08) == 7);
+    TEST_CHECK(frac_zeroes(1.0E-012) == 11);
+    TEST_CHECK(frac_zeroes(1.0E-150) == 149);
+    TEST_CHECK(frac_zeroes(1.0E+012) == 0);
+    TEST_CHECK(frac_zeroes(1.0E+150) == 0);
+}
+
+
+void test_examples()
+{
+    // for stream functions
+    std::ostringstream ss;
+
+    // First example
+    printfor(ss, "(I3, SP, 2(1X, F5.2), 2X, SS, G9.3E3)", 10, 3.1416, 3.333, 2.7545E-12);
+    TEST_CHECK(compare_strings(ss.str().c_str(), " 10 +3.14 +3.33  .275E-011"));
+    ss.str(std::string()); 
+
+    // Comparsion example
+    printfor(ss, "(A, 2(I3, I3))", "test: ", 1, 2, 3, 4);
+    TEST_CHECK(compare_strings(ss.str().c_str(), "test:   1  2  3  4"));
+    ss.str(std::string()); 
 }
 
 
@@ -584,6 +607,21 @@ void test_format_mixfloat()
     printfor(ss, "(2G10.3E3, D10.4)", 1.0, 2.0, 1.34567);
     TEST_CHECK(compare_strings(ss.str().c_str(), " 1.00      2.00     0.1346D+01"));
     ss.str(std::string()); 
+
+    // big and very small numbers (in absolute value)
+    printfor(ss, "(SP, G10.3E3, 2X, G14.4E4)", 2.7545E-12, -2.7545E-12);
+    TEST_CHECK(compare_strings(ss.str().c_str(), "+.275E-011   -0.2755E-0011"));
+    ss.str(std::string()); 
+
+    // big and very small numbers (in absolute value)
+    printfor(ss, "(SP, G10.3E3, 2X, G14.4E4)", 0.8775840431531924E+157, 0.6363997259174462E+195);
+    TEST_CHECK(compare_strings(ss.str().c_str(), "+.878E+157   +0.6364E+0195"));
+    ss.str(std::string());
+
+    // big and very small (in absolute value) negative numbers
+    printfor(ss, "(SP, G10.3E3, 2X, G14.4E4)", -2.7545E-12, -0.6363997259174462E+195);
+    TEST_CHECK(compare_strings(ss.str().c_str(), "-.275E-011   -0.6364E+0195"));
+    ss.str(std::string());
 }
 
 
@@ -674,7 +712,6 @@ std::string trim_lb(std::string source)
         }
         pos_src = pos_src + 1;
     }
-    // dest[pos_dest] = '\0';
 
     return dest;
 }

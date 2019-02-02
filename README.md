@@ -25,7 +25,7 @@ Something like this:
 ```f90
 program formt
 implicit none
-    print "(A, 2(I3, I3)", "test", 1, 2, 3, 4
+    print "(A, 2(I3, I3))", "test: ", 1, 2, 3, 4
 end program formt
 ```
 
@@ -36,7 +36,7 @@ Becomes this:
 
 void main()
 {
-    printfor("(A, 2(I3, I3)", "test: ", 1, 2, 3, 4);
+    printfor("(A, 2(I3, I3))", "test: ", 1, 2, 3, 4);
 }
 ```
 

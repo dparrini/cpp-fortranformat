@@ -43,7 +43,5 @@ test: $(TEST_OBJS)
 
 clean:
 	rm -f $(OUTDIR)/test.exe
-	rm -f $(OUTDIR)/testf.exe
 	rm -f $(OUTDIR)/$(BINTARGET).exe
 	rm -f $(OBJDIR)/*.o
-	rm -f $(OBJDIR)/*.of

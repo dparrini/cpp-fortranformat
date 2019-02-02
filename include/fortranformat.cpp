@@ -191,11 +191,11 @@ inline bool is_negative(double const value)
 }
 
 
-size_t fast_10pow(size_t const exponent)
+double fast_10pow(size_t const exponent)
 {
-    static size_t pow10[10] = {
-        1, 10, 100, 1000, 10000, 
-        100000, 1000000, 10000000, 100000000, 1000000000
+    static double pow10[10] = {
+        1.0, 10.0, 100.0, 1000.0, 10000.0, 
+        100000.0, 1000000.0, 10000000.0, 100000000.0, 1000000000.0
     };
 
     if (exponent <= 9)
@@ -206,10 +206,10 @@ size_t fast_10pow(size_t const exponent)
     else
     {
         // generic
-        size_t powered = 1;
+        double powered = 1.0;
         for (size_t n=0; n < exponent; ++n)
         {
-            powered = powered * 10;
+            powered = powered * 10.0;
         }
         return powered;
     }
@@ -240,7 +240,7 @@ void write_integer(char* put, double const value,
 
     for(size_t pos = 0; pos < digits; ++pos)
     {
-        size_t power = fast_10pow(digits - pos - 1);
+        size_t power = static_cast<size_t>(fast_10pow(digits - pos - 1));
         unsigned int newvalue = static_cast<int>(intpart / power);
 
         // round last digit
@@ -262,24 +262,44 @@ void write_integer(char* put, double const value,
 }
 
 
+int base10_exponent(double const value)
+{
+    double const absvalue = fabs(value);
+
+    // general case, absvalue >= 1E+6 or < 1E-6
+    if (absvalue >=  1000000.0 || absvalue < 0.000001)
+    {
+        return floor(log10(absvalue));
+    }
+    else
+    {
+        if (absvalue >= 100000.0)  return  5;  
+        if (absvalue >= 10000.0 )  return  4;
+        if (absvalue >= 1000.0  )  return  3;
+        if (absvalue >= 100.0   )  return  2;
+        if (absvalue >= 10.0    )  return  1;
+        if (absvalue >=  1.0    )  return  0;
+        if (absvalue >=  0.1    )  return -1;  
+        if (absvalue >=  0.01   )  return -2;
+        if (absvalue >=  0.001  )  return -3;
+        if (absvalue >=  0.0001 )  return -4;
+        if (absvalue >=  0.00001)  return -5;
+        return -6;
+    }
+}
+
+
 size_t frac_zeroes(double const value)
 {   
-    if (value >= 1.0)
+    double const absvalue = fabs(value);
+    if (absvalue >= 0.1)
     {
         return 0;
     }
-    double absvalue = fabs(value);
-    // general solution (using it for small numbers)
-    if (absvalue < 0.000001) return -floor(log10(absvalue)) + 1;
-    // ugly, but optimal
-    // similar: https://stackoverflow.com/a/3069580
-    if (absvalue < 0.000001)  return 6;
-    if (absvalue < 0.00001 )  return 5;
-    if (absvalue < 0.0001  )  return 4;
-    if (absvalue < 0.001   )  return 3;
-    if (absvalue < 0.01    )  return 2;
-    if (absvalue < 0.1     )  return 1;
-    return 0;
+    else
+    {
+        return -base10_exponent(value) -1;
+    }
 }
 
 
@@ -591,32 +611,30 @@ void format_e(char* put, double const value, size_t const width,
     {
         // calculate the fractional part and the exponent
         double finalnumber;
-        int exponent;
+        int const exponent = base10_exponent(value);
+        // print exponent, since the number starts with 0.
+        int const expfort = exponent + 1;
+        // power of 10 to extract the values to print in the space given the precision
         double power;
-        if (absvalue >= 1)
+        if (exponent >= 0)
         {
-            // numbers with the integer part
-            unsigned int intval = static_cast<unsigned int>(absvalue);
-            exponent = integer_str_length(intval);
-
-            if (exponent >= static_cast<int>(precision))
+            if (expfort >= static_cast<int>(precision))
             {
-                power = 1.0 / static_cast<double>(fast_10pow(exponent - precision));
+                power = 1.0 / static_cast<double>(fast_10pow(expfort - precision));
             }
             else
             {
-                power = static_cast<double>(fast_10pow(precision - exponent));
+                power = static_cast<double>(fast_10pow(precision - expfort));
             }
         }
         else
         {
-            // numbers of zeroes in the fractional part
-            exponent = frac_zeroes(absvalue);
-            power = static_cast<double>(fast_10pow(exponent + precision));
-
-            exponent = - exponent;
+            // -exponent + 1 = numbers of zeroes in the fractional part
+            int const zeroes = -(exponent + 1);
+            power = static_cast<double>(fast_10pow(zeroes + precision));
         }
         // final number after the decimal separator
+
         finalnumber = absvalue * power;
         unsigned int intval = static_cast<unsigned int>(round(finalnumber));
 
@@ -660,7 +678,7 @@ void format_e(char* put, double const value, size_t const width,
         // exponent sign
         put[pos] = expchar;
         pos = pos + 1;
-        if (exponent >= 0.0)
+        if (expfort >= 0)
         {
             put[pos] = '+';
         }
@@ -671,7 +689,7 @@ void format_e(char* put, double const value, size_t const width,
         pos = pos + 1;
 
         // exponent value
-        format_i(put + pos, abs(exponent), exponent_width, exponent_width, false);
+        format_i(put + pos, abs(expfort), exponent_width, exponent_width, false);
         pos = pos + exponent_width;
     }
     put[pos] = '\0';
